@@ -7,26 +7,31 @@ function formatRs(n: number) {
   return `Rs ${n.toLocaleString('en-PK', { maximumFractionDigits: 0 })}`;
 }
 
-const PODIUM_COLORS = [
-  'bg-yellow-400 text-yellow-900',  // 1st
-  'bg-slate-300 text-slate-700',    // 2nd
-  'bg-amber-600 text-amber-100',    // 3rd
-];
-
-const PODIUM_HEIGHTS = ['h-28', 'h-20', 'h-14'];
-
 function Podium({ entries }: { entries: LeaderboardEntry[] }) {
   const top3 = entries.slice(0, 3);
-  // Reorder: 2nd, 1st, 3rd for visual podium
-  const display = [top3[1], top3[0], top3[2]].filter(Boolean);
-  const heights = top3[1] ? PODIUM_HEIGHTS : [PODIUM_HEIGHTS[1], PODIUM_HEIGHTS[0], PODIUM_HEIGHTS[2]];
+  if (top3.length === 0) return null;
+
+  // Visual order: 2nd (left), 1st (centre), 3rd (right)
+  const displaySlots: (LeaderboardEntry | undefined)[] =
+    top3.length === 1
+      ? [undefined, top3[0], undefined]
+      : top3.length === 2
+      ? [top3[1], top3[0], undefined]
+      : [top3[1], top3[0], top3[2]];
+
+  // Heights and colors per visual slot (left=2nd, centre=1st, right=3rd)
+  const slotHeights = ['h-20', 'h-28', 'h-14'];
+  const slotColors = [
+    'bg-slate-300 text-slate-700',   // left (2nd)
+    'bg-yellow-400 text-yellow-900', // centre (1st)
+    'bg-amber-600 text-amber-100',   // right (3rd)
+  ];
+  const slotMedals = ['🥈', '🥇', '🥉'];
 
   return (
     <div className="flex items-end justify-center gap-4 py-8">
-      {display.map((entry, i) => {
-        if (!entry) return null;
-        const rank = entry === top3[0] ? 0 : entry === top3[1] ? 1 : 2;
-        const heightClass = heights[i];
+      {displaySlots.map((entry, i) => {
+        if (!entry) return <div key={i} className="w-20" />;
         return (
           <div key={entry.cashier_id} className="flex flex-col items-center">
             <div className="mb-2 flex flex-col items-center">
@@ -39,9 +44,9 @@ function Podium({ entries }: { entries: LeaderboardEntry[] }) {
               <p className="text-xs text-slate-500">{formatRs(entry.revenue)}</p>
             </div>
             <div
-              className={`flex w-20 items-center justify-center rounded-t-lg text-2xl font-bold ${heightClass} ${PODIUM_COLORS[rank]}`}
+              className={`flex w-20 items-center justify-center rounded-t-lg text-2xl font-bold ${slotHeights[i]} ${slotColors[i]}`}
             >
-              {rank === 0 ? '🥇' : rank === 1 ? '🥈' : '🥉'}
+              {slotMedals[i]}
             </div>
           </div>
         );
