@@ -384,6 +384,4 @@ export function SettingsPage() {
   );
 }
 
-// Inline CSS class helper — add to tailwind config or use inline approach
-const _inputFieldClass = 'w-full rounded-xl border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none';
-void _inputFieldClass;
+export const inputFieldClass = 'w-full rounded-xl border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none';

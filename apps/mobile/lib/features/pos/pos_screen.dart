@@ -22,7 +22,7 @@ class CartEntry {
   double get lineTotal {
     final subtotal = product.price * qty;
     final gst = (subtotal * product.taxRate / 100 * 100).round() / 100;
-    return (subtotal + gst * 100).round() / 100;
+    return ((subtotal + gst) * 100).round() / 100;
   }
 }
 
