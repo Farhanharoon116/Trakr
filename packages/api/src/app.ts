@@ -13,8 +13,12 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
+  const nodeEnv = process.env['NODE_ENV'];
   const allowedOrigin = process.env['VITE_APP_URL'] ??
-    (process.env['NODE_ENV'] !== 'production' ? 'http://localhost:5173' : false);
+    (nodeEnv !== 'production' ? 'http://localhost:5173' : undefined);
+  if (nodeEnv === 'production' && !allowedOrigin) {
+    throw new Error('VITE_APP_URL must be set in production');
+  }
   app.use(cors({
     origin: allowedOrigin,
     credentials: true,

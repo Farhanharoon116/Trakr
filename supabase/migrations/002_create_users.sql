@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-  id              UUID PRIMARY KEY REFERENCES auth.users(id),
+  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   business_id     UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
   phone           VARCHAR(20) NOT NULL,
   name            VARCHAR(255) NOT NULL,
