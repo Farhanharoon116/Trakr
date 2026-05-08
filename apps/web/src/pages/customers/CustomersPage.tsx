@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,20 +17,6 @@ import type { Customer } from '@bizos/shared';
 
 function formatRs(n: number) {
   return `Rs ${n.toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-}
-
-function useDebounce(value: string, delay: number): string {
-  const [debounced, setDebounced] = useState(value);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const set = useCallback(
-    (v: string) => {
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setDebounced(v), delay);
-    },
-    [delay]
-  );
-  return debounced;
-  void set;
 }
 
 // Simple debounced search hook
@@ -349,9 +335,6 @@ export function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const { data: customers, isLoading } = useCustomers(searchDebounced || undefined);
-
-  // suppress unused warning
-  void useDebounce;
 
   return (
     <div className="p-6">

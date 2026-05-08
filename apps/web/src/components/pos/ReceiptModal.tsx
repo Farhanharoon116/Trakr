@@ -34,6 +34,7 @@ export function ReceiptModal({
   onWhatsApp,
 }: ReceiptModalProps) {
   const { business } = useAuthStore();
+  const taxableAmount = Math.round((subtotal - discountAmount) * 100) / 100;
 
   const handlePrint = useCallback(() => {
     const doc = new jsPDF({
@@ -136,7 +137,6 @@ export function ReceiptModal({
 
     // FBR GST breakdown — show taxable amount separately when NTN is configured
     if (business?.tax_id) {
-      const taxableAmount = Math.round((subtotal - discountAmount) * 100) / 100;
       doc.text('Taxable Amount', 5, y);
       doc.text(formatRs(taxableAmount), pageWidth - 5, y, { align: 'right' });
       y += lineH;
@@ -204,7 +204,7 @@ export function ReceiptModal({
           )}
           {taxAmount > 0 && (
             <p className="mt-0.5 text-xs text-slate-500">
-              Taxable: {formatRs(subtotal - discountAmount)} | GST: {formatRs(taxAmount)}
+              Taxable: {formatRs(taxableAmount)} | GST: {formatRs(taxAmount)}
             </p>
           )}
           {business?.tax_id && (
