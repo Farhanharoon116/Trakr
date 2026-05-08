@@ -1,0 +1,11 @@
+{
+  "name": "@bizos/api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'api dev placeholder'",
+    "build": "echo 'api build placeholder'",
+    "test": "echo 'api test placeholder'",
+    "typecheck": "echo 'api typecheck placeholder'"
+  }
+}

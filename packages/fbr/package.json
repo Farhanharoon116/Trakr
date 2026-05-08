@@ -1,0 +1,11 @@
+{
+  "name": "@bizos/fbr",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'fbr dev placeholder'",
+    "build": "echo 'fbr build placeholder'",
+    "test": "echo 'fbr test placeholder'",
+    "typecheck": "echo 'fbr typecheck placeholder'"
+  }
+}
