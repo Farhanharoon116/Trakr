@@ -4,6 +4,7 @@ import { supabase } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../utils/errors';
+import { parsePagination } from '../utils/pagination';
 
 export const customerRouter = Router();
 customerRouter.use(authMiddleware);
@@ -65,5 +66,34 @@ customerRouter.patch(
       .single();
     if (error || !data) throw new AppError('Customer not found', 404);
     res.json(data);
+  })
+);
+
+// GET /customers/:id/purchases — last 20 sales for this customer
+customerRouter.get(
+  '/:id/purchases',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { page, limit } = parsePagination(req.query as Record<string, unknown>);
+
+    // Verify the customer belongs to this business
+    const { data: customer, error: cErr } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('id', req.params['id'])
+      .eq('business_id', req.user.businessId)
+      .single();
+
+    if (cErr || !customer) throw new AppError('Customer not found', 404);
+
+    const { data, error, count } = await supabase
+      .from('sales')
+      .select('id, receipt_number, total, payment_method, created_at, sale_items(id)', { count: 'exact' })
+      .eq('business_id', req.user.businessId)
+      .eq('customer_id', req.params['id'])
+      .order('created_at', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+
+    if (error) throw new AppError('Could not fetch purchase history', 500);
+    res.json({ data, total: count ?? 0, page, limit });
   })
 );

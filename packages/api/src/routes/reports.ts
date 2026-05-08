@@ -3,6 +3,7 @@ import { supabase } from '../db';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../utils/errors';
+import { generateGSTReturn } from '@bizos/fbr';
 
 export const reportRouter = Router();
 reportRouter.use(authMiddleware);
@@ -93,7 +94,7 @@ reportRouter.get(
     const productRevMap = new Map<string, { name: string; revenue: number }>();
     for (const item of (topItems ?? [])) {
       const pid = item.product_id as string;
-      const name = (item.products as { name_en: string } | null)?.name_en ?? pid;
+      const name = ((item.products as unknown) as { name_en: string } | null)?.name_en ?? pid;
       const existing = productRevMap.get(pid);
       productRevMap.set(pid, {
         name,
@@ -123,6 +124,7 @@ reportRouter.get(
   asyncHandler(async (req: Request, res: Response) => {
     const from = req.query['from'] as string;
     const to = req.query['to'] as string;
+    const period = (req.query['period'] as 'monthly' | 'quarterly') ?? 'monthly';
 
     if (!from || !to) throw new AppError('from and to date query params required', 400);
 
@@ -131,14 +133,30 @@ reportRouter.get(
       .select('receipt_number, created_at, total, tax_amount, customers(name)')
       .eq('business_id', req.user.businessId)
       .gte('created_at', from)
-      .lte('created_at', to);
+      .lte('created_at', to)
+      .order('created_at', { ascending: true });
 
     if (error) throw new AppError('Could not generate GST report', 500);
 
+    const rows = (data ?? []).map((r) => ({
+      receipt_number: r.receipt_number as string,
+      created_at: r.created_at as string,
+      total: r.total as number,
+      tax_amount: r.tax_amount as number,
+      customer_name: ((r.customers as unknown) as { name: string } | null)?.name,
+    }));
+
+    const csvString = generateGSTReturn(rows, period);
+    const totalSales = rows.reduce((s, r) => s + r.total, 0);
+    const totalTax = rows.reduce((s, r) => s + r.tax_amount, 0);
+    const totalTaxable = Math.round((totalSales - totalTax) * 100) / 100;
+
     res.json({
-      sales: data,
-      total_sales: (data ?? []).reduce((s, r) => s + (r.total as number), 0),
-      total_tax: (data ?? []).reduce((s, r) => s + (r.tax_amount as number), 0),
+      sales: rows,
+      total_sales: Math.round(totalSales * 100) / 100,
+      total_taxable: totalTaxable,
+      total_tax: Math.round(totalTax * 100) / 100,
+      csv: csvString,
     });
   })
 );

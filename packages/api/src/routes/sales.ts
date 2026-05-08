@@ -97,11 +97,29 @@ saleRouter.post(
 
     // Deduct inventory
     for (const item of body.items) {
-      await supabase.rpc('adjust_inventory', {
-        p_product_id: item.product_id,
-        p_branch_id: body.branch_id,
-        p_qty_change: -item.qty,
-      }).then(() => void 0).catch((err) => logger.warn({ err, product_id: item.product_id }, 'Inventory adjustment failed'));
+      try {
+        await supabase.rpc('adjust_inventory', {
+          p_product_id: item.product_id,
+          p_branch_id: body.branch_id,
+          p_qty_change: -item.qty,
+        });
+      } catch (err) {
+        logger.warn({ err, product_id: item.product_id }, 'Inventory adjustment failed');
+      }
+    }
+
+    // Award loyalty points (1 point per Rs 100 spent) and update total_spent
+    if (body.customer_id) {
+      const pointsEarned = Math.floor(body.total / 100);
+      try {
+        await supabase.rpc('increment_customer_loyalty', {
+          p_customer_id: body.customer_id,
+          p_points: pointsEarned,
+          p_amount: body.total,
+        });
+      } catch (err) {
+        logger.warn({ err, customer_id: body.customer_id }, 'Loyalty points update failed');
+      }
     }
 
     res.status(201).json(sale);
