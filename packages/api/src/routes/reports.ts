@@ -15,7 +15,7 @@ reportRouter.get(
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
 
-    const [todaySales, yesterdaySales, lowStock] = await Promise.all([
+    const [todaySales, yesterdaySales, inventoryResult] = await Promise.all([
       supabase
         .from('sales')
         .select('total, id')
@@ -29,7 +29,7 @@ reportRouter.get(
         .lt('created_at', todayStart),
       supabase
         .from('inventory')
-        .select('id')
+        .select('id, qty_on_hand, reorder_point')
         .eq('business_id', req.user.businessId),
     ]);
 
@@ -42,8 +42,10 @@ reportRouter.get(
       0
     );
 
-    const allInventory = lowStock.data ?? [];
-    const lowStockCount = 0; // Would need comparison query
+    const allInventory = inventoryResult.data ?? [];
+    const lowStockCount = allInventory.filter(
+      (item) => (item.qty_on_hand as number) < (item.reorder_point as number)
+    ).length;
 
     res.json({
       today_revenue: Math.round(todayRevenue * 100) / 100,

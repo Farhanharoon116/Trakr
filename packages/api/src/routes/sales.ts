@@ -5,6 +5,7 @@ import { supabase } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../utils/errors';
+import { logger } from '../utils/logger';
 import { parsePagination } from '../utils/pagination';
 
 export const saleRouter = Router();
@@ -100,7 +101,7 @@ saleRouter.post(
         p_product_id: item.product_id,
         p_branch_id: body.branch_id,
         p_qty_change: -item.qty,
-      }).then(() => void 0).catch(() => void 0);
+      }).then(() => void 0).catch((err) => logger.warn({ err, product_id: item.product_id }, 'Inventory adjustment failed'));
     }
 
     res.status(201).json(sale);

@@ -8,7 +8,7 @@ import { AppError } from '../utils/errors';
 const OTP_TTL_SECONDS = 300; // 5 minutes
 
 export async function sendOTP(phone: string): Promise<void> {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otp = crypto.randomInt(100000, 1000000).toString();
   const hash = await bcrypt.hash(otp, 10);
   const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString();
 

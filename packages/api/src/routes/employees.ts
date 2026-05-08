@@ -87,7 +87,7 @@ employeeRouter.get(
 
     const employee = {
       ...(data as Record<string, unknown>),
-      cnic: data.cnic ? `****-*******-${(decrypt(data.cnic as string)).slice(-1)}` : null,
+      cnic: data.cnic ? `*****-*******-${(decrypt(data.cnic as string)).slice(-1)}` : null,
       bank_account: data.bank_account ? `****${(decrypt(data.bank_account as string)).slice(-4)}` : null,
     };
 

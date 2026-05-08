@@ -13,7 +13,11 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  app.use(cors({ origin: process.env['VITE_APP_URL'] ?? '*', credentials: true }));
+  const allowedOrigin = process.env['VITE_APP_URL'];
+  app.use(cors({
+    origin: allowedOrigin ? allowedOrigin : false,
+    credentials: true,
+  }));
   app.use(compression());
   app.use(express.json({ limit: '10mb' }));
   app.use(pinoHttp({ logger }));

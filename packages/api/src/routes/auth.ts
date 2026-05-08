@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { rateLimit } from 'express-rate-limit';
+import { createHash } from 'crypto';
 import { z } from 'zod';
 import { OTPRequestSchema, OTPVerifySchema } from '@bizos/shared';
 import { supabase } from '../db';
@@ -80,7 +81,7 @@ authRouter.post(
     await supabase.from('refresh_tokens').insert({
       id: tokenId,
       user_id: user.id,
-      token_hash: refreshToken.slice(-20),
+      token_hash: createHash('sha256').update(refreshToken).digest('hex'),
       expires_at: expiresAt,
     });
 
@@ -209,7 +210,7 @@ authRouter.post(
     await supabase.from('refresh_tokens').insert({
       id: tokenId,
       user_id: user.id,
-      token_hash: refreshToken.slice(-20),
+      token_hash: createHash('sha256').update(refreshToken).digest('hex'),
       expires_at: expiresAt,
     });
 
