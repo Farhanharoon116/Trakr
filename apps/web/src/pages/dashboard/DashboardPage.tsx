@@ -134,7 +134,7 @@ export function DashboardPage() {
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 11 }}
-                tickFormatter={(d: string) => d.slice(5)}
+                tickFormatter={(d: string) => d.length > 5 ? d.slice(5) : d}
               />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} />
               <Tooltip formatter={(v: number) => [formatRs(v), 'Revenue']} labelFormatter={(l: string) => format(new Date(l), 'dd MMM')} />
