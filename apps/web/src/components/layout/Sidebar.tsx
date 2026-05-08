@@ -11,6 +11,11 @@ import {
   Settings,
   BarChart3,
   X,
+  Brain,
+  ShoppingBag,
+  Trophy,
+  Shield,
+  GitBranch,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
@@ -31,7 +36,12 @@ const navItems: NavItem[] = [
   { to: '/employees', label: 'Employees', icon: Users, roles: ['owner', 'manager'] },
   { to: '/attendance', label: 'Attendance', icon: Clock, roles: ['owner', 'manager'] },
   { to: '/shifts', label: 'Shifts', icon: Clock4, roles: ['owner', 'manager', 'cashier'] },
-  { to: '/reports', label: 'Reports', icon: BarChart3, roles: ['owner', 'manager'] },
+  { to: '/procurement', label: 'Procurement', icon: ShoppingBag, roles: ['owner', 'manager'] },
+  { to: '/reports/gst', label: 'Reports', icon: BarChart3, roles: ['owner', 'manager'] },
+  { to: '/reports/branches', label: 'Branches', icon: GitBranch, roles: ['owner', 'manager'] },
+  { to: '/leaderboard', label: 'Leaderboard', icon: Trophy, roles: ['owner', 'manager'] },
+  { to: '/ai', label: 'AI Insights', icon: Brain, roles: ['owner', 'manager'] },
+  { to: '/audit', label: 'Audit Log', icon: Shield, roles: ['owner'] },
   { to: '/settings', label: 'Settings', icon: Settings, roles: ['owner'] },
 ];
 

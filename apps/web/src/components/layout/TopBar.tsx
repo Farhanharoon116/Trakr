@@ -1,7 +1,46 @@
-import { Menu, Globe, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, Globe, LogOut, ChevronDown, GitBranch } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
 import { OfflineBadge } from '../shared/OfflineBadge';
+import { useBranches } from '../../hooks/useBranches';
+
+function BranchSwitcher() {
+  const { data: branches } = useBranches();
+  const { selectedBranchId, setSelectedBranchId } = useUIStore();
+  const { user } = useAuthStore();
+
+  if (!branches || branches.length <= 1 || (user?.role !== 'owner' && user?.role !== 'manager')) {
+    return null;
+  }
+
+  const selected = branches.find((b) => b.id === selectedBranchId);
+
+  return (
+    <div className="relative flex items-center gap-1">
+      <GitBranch className="h-4 w-4 text-slate-400" />
+      <select
+        value={selectedBranchId ?? ''}
+        onChange={(e) => setSelectedBranchId(e.target.value || null)}
+        className="rounded-lg border border-border bg-transparent py-1 pl-1 pr-6 text-sm text-slate-700 focus:border-primary focus:outline-none"
+        aria-label="Select branch"
+      >
+        <option value="">All Branches</option>
+        {branches.map((b) => (
+          <option key={b.id} value={b.id}>
+            {b.name}
+          </option>
+        ))}
+      </select>
+      {selected && (
+        <button
+          onClick={() => setSelectedBranchId(null)}
+          className="absolute right-1 top-1 text-slate-400 hover:text-slate-600"
+          aria-label="Clear branch filter"
+        />
+      )}
+    </div>
+  );
+}
 
 export function TopBar() {
   const { user, business, logout } = useAuthStore();
@@ -22,6 +61,8 @@ export function TopBar() {
 
       <div className="flex items-center gap-3">
         <OfflineBadge />
+
+        <BranchSwitcher />
 
         <button
           onClick={toggleLanguage}

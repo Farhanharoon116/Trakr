@@ -160,3 +160,179 @@ reportRouter.get(
     });
   })
 );
+
+reportRouter.get(
+  '/leaderboard',
+  asyncHandler(async (req: Request, res: Response) => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    // Top cashiers by revenue this month
+    const { data: salesData } = await supabase
+      .from('sales')
+      .select('cashier_id, total')
+      .eq('business_id', req.user.businessId)
+      .gte('created_at', monthStart);
+
+    const cashierRevMap = new Map<string, { revenue: number; transactions: number }>();
+    for (const sale of salesData ?? []) {
+      const cid = sale.cashier_id as string;
+      const prev = cashierRevMap.get(cid) ?? { revenue: 0, transactions: 0 };
+      cashierRevMap.set(cid, {
+        revenue: prev.revenue + (sale.total as number),
+        transactions: prev.transactions + 1,
+      });
+    }
+
+    // Fetch user names
+    const cashierIds = Array.from(cashierRevMap.keys());
+    const { data: usersData } = cashierIds.length
+      ? await supabase
+          .from('users')
+          .select('id, name, avatar_url')
+          .eq('business_id', req.user.businessId)
+          .in('id', cashierIds)
+      : { data: [] };
+
+    const nameMap = new Map<string, { name: string; avatar_url: string | null }>();
+    for (const u of usersData ?? []) {
+      nameMap.set(u.id as string, {
+        name: u.name as string,
+        avatar_url: u.avatar_url as string | null,
+      });
+    }
+
+    const leaderboardByRevenue = Array.from(cashierRevMap.entries())
+      .map(([id, stats]) => ({
+        cashier_id: id,
+        name: nameMap.get(id)?.name ?? id,
+        avatar_url: nameMap.get(id)?.avatar_url ?? null,
+        revenue: Math.round(stats.revenue * 100) / 100,
+        transactions: stats.transactions,
+        avg_sale: stats.transactions
+          ? Math.round((stats.revenue / stats.transactions) * 100) / 100
+          : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    // Perfect attendance (zero absences this month)
+    const { data: attendanceData } = await supabase
+      .from('attendance')
+      .select('employee_id, status')
+      .eq('business_id', req.user.businessId)
+      .gte('date', monthStart.split('T')[0]);
+
+    const absentSet = new Set<string>();
+    for (const rec of attendanceData ?? []) {
+      if (rec.status === 'absent') absentSet.add(rec.employee_id as string);
+    }
+    const presentSet = new Set<string>();
+    for (const rec of attendanceData ?? []) {
+      if (rec.status === 'present') presentSet.add(rec.employee_id as string);
+    }
+    const perfectAttendanceIds = Array.from(presentSet).filter((id) => !absentSet.has(id));
+
+    const { data: empData } = perfectAttendanceIds.length
+      ? await supabase
+          .from('employees')
+          .select('id, name')
+          .eq('business_id', req.user.businessId)
+          .in('id', perfectAttendanceIds)
+      : { data: [] };
+
+    res.json({
+      top_by_revenue: leaderboardByRevenue,
+      top_by_transactions: [...leaderboardByRevenue].sort(
+        (a, b) => b.transactions - a.transactions
+      ),
+      top_by_avg_sale: [...leaderboardByRevenue].sort((a, b) => b.avg_sale - a.avg_sale),
+      perfect_attendance: empData ?? [],
+    });
+  })
+);
+
+reportRouter.get(
+  '/branch-comparison',
+  asyncHandler(async (req: Request, res: Response) => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 29
+    ).toISOString();
+
+    const [branchesRes, salesRes, inventoryRes] = await Promise.all([
+      supabase
+        .from('branches')
+        .select('id, name')
+        .eq('business_id', req.user.businessId)
+        .eq('is_active', true),
+      supabase
+        .from('sales')
+        .select('branch_id, total, created_at')
+        .eq('business_id', req.user.businessId)
+        .gte('created_at', thirtyDaysAgo)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('inventory')
+        .select('branch_id, qty_on_hand, reorder_point, products(name_en)')
+        .eq('business_id', req.user.businessId),
+    ]);
+
+    const branches = branchesRes.data ?? [];
+    const branchNameMap = new Map(
+      branches.map((b) => [b.id as string, b.name as string])
+    );
+
+    // Revenue by branch per day (last 30 days)
+    const daySet = new Set<string>();
+    const branchDayMap = new Map<string, Map<string, number>>();
+    for (const sale of salesRes.data ?? []) {
+      const day = (sale.created_at as string).split('T')[0];
+      daySet.add(day);
+      const bid = sale.branch_id as string;
+      if (!branchDayMap.has(bid)) branchDayMap.set(bid, new Map());
+      const dayMap = branchDayMap.get(bid)!;
+      dayMap.set(day, (dayMap.get(day) ?? 0) + (sale.total as number));
+    }
+    const days = Array.from(daySet).sort();
+    const revenueChart = days.map((date) => {
+      const point: Record<string, unknown> = { date };
+      for (const [bid, bName] of branchNameMap.entries()) {
+        point[bName] = Math.round((branchDayMap.get(bid)?.get(date) ?? 0) * 100) / 100;
+      }
+      return point;
+    });
+
+    // Inventory by branch
+    const branchInventoryMap = new Map<string, { total: number; low: number }>();
+    for (const inv of inventoryRes.data ?? []) {
+      const bid = inv.branch_id as string;
+      const prev = branchInventoryMap.get(bid) ?? { total: 0, low: 0 };
+      branchInventoryMap.set(bid, {
+        total: prev.total + 1,
+        low:
+          prev.low +
+          ((inv.qty_on_hand as number) < (inv.reorder_point as number) ? 1 : 0),
+      });
+    }
+
+    const inventoryComparison = branches.map((b) => ({
+      branch_id: b.id,
+      branch_name: b.name,
+      total_skus: branchInventoryMap.get(b.id as string)?.total ?? 0,
+      low_stock_count: branchInventoryMap.get(b.id as string)?.low ?? 0,
+    }));
+
+    // Revenue totals per branch (last 30 days)
+    const revenueTotals = branches.map((b) => {
+      const total = Array.from(branchDayMap.get(b.id as string)?.values() ?? []).reduce(
+        (s, v) => s + v,
+        0
+      );
+      return { branch_id: b.id, branch_name: b.name, total_revenue: Math.round(total * 100) / 100 };
+    });
+
+    res.json({ revenue_chart: revenueChart, revenue_totals: revenueTotals, inventory_comparison: inventoryComparison });
+  })
+);

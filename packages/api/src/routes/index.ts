@@ -12,6 +12,10 @@ import { shiftRouter } from './shifts';
 import { reportRouter } from './reports';
 import { categoryRouter } from './categories';
 import { leaveRequestRouter } from './leave-requests';
+import { supplierRouter } from './suppliers';
+import { purchaseOrderRouter } from './purchase-orders';
+import { aiRouter } from './ai';
+import { auditLogRouter } from './audit-logs';
 
 export const apiRouter = Router();
 
@@ -28,3 +32,7 @@ apiRouter.use('/attendance', attendanceRouter);
 apiRouter.use('/shifts', shiftRouter);
 apiRouter.use('/leave-requests', leaveRequestRouter);
 apiRouter.use('/reports', reportRouter);
+apiRouter.use('/suppliers', supplierRouter);
+apiRouter.use('/purchase-orders', purchaseOrderRouter);
+apiRouter.use('/ai', aiRouter);
+apiRouter.use('/audit-logs', auditLogRouter);

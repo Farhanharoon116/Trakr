@@ -12,7 +12,12 @@ import { AttendancePage } from './pages/attendance/AttendancePage';
 import { ShiftsPage } from './pages/shifts/ShiftsPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { GSTReportPage } from './pages/reports/GSTReportPage';
+import { ConsolidatedReportsPage } from './pages/reports/ConsolidatedReportsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+import { PurchaseOrdersPage } from './pages/procurement/PurchaseOrdersPage';
+import { AIPage } from './pages/ai/AIPage';
+import { LeaderboardPage } from './pages/leaderboard/LeaderboardPage';
+import { AuditLogPage } from './pages/audit/AuditLogPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useAuthStore } from './store/auth.store';
 import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
@@ -130,7 +135,47 @@ export default function App() {
                 </RequireRole>
               }
             />
+            <Route
+              path="/reports/branches"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <ConsolidatedReportsPage />
+                </RequireRole>
+              }
+            />
             <Route path="/reports" element={<Navigate to="/reports/gst" replace />} />
+            <Route
+              path="/procurement"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <PurchaseOrdersPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/ai"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <AIPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <LeaderboardPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/audit"
+              element={
+                <RequireRole roles={['owner']}>
+                  <AuditLogPage />
+                </RequireRole>
+              }
+            />
             <Route
               path="/settings"
               element={

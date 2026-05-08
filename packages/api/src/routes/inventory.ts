@@ -88,3 +88,80 @@ inventoryRouter.get(
     res.json(lowStock);
   })
 );
+
+inventoryRouter.post(
+  '/transfer',
+  requireRole('owner', 'manager'),
+  asyncHandler(async (req: Request, res: Response) => {
+    const schema = z.object({
+      product_id: z.string().uuid(),
+      from_branch_id: z.string().uuid(),
+      to_branch_id: z.string().uuid(),
+      qty: z.number().positive(),
+      reason: z.string().min(1).default('Inter-branch transfer'),
+    });
+    const { product_id, from_branch_id, to_branch_id, qty, reason } = schema.parse(req.body);
+
+    if (from_branch_id === to_branch_id) {
+      throw new AppError('Source and destination branches must differ', 400);
+    }
+
+    // Check source stock
+    const { data: srcInv, error: srcErr } = await supabase
+      .from('inventory')
+      .select('qty_on_hand')
+      .eq('product_id', product_id)
+      .eq('branch_id', from_branch_id)
+      .single();
+
+    if (srcErr || !srcInv) throw new AppError('Source inventory not found', 404);
+    if ((srcInv.qty_on_hand as number) < qty) {
+      throw new AppError('Insufficient stock in source branch', 400);
+    }
+
+    // Deduct from source
+    await supabase.rpc('adjust_inventory', {
+      p_product_id: product_id,
+      p_branch_id: from_branch_id,
+      p_qty_change: -qty,
+    });
+
+    // Add to destination (upsert if not exists)
+    const { data: dstInv } = await supabase
+      .from('inventory')
+      .select('id')
+      .eq('product_id', product_id)
+      .eq('branch_id', to_branch_id)
+      .maybeSingle();
+
+    if (dstInv) {
+      await supabase.rpc('adjust_inventory', {
+        p_product_id: product_id,
+        p_branch_id: to_branch_id,
+        p_qty_change: qty,
+      });
+    } else {
+      await supabase.from('inventory').insert({
+        business_id: req.user.businessId,
+        product_id,
+        branch_id: to_branch_id,
+        qty_on_hand: qty,
+        reorder_point: 0,
+        reorder_qty: 0,
+      });
+    }
+
+    // Audit log
+    await supabase.from('audit_logs').insert({
+      business_id: req.user.businessId,
+      user_id: req.user.userId,
+      table_name: 'inventory',
+      record_id: product_id,
+      action: 'UPDATE',
+      old_data: { qty_deducted: qty, from_branch_id },
+      new_data: { qty_added: qty, to_branch_id, reason },
+    });
+
+    res.json({ success: true, qty_transferred: qty });
+  })
+);

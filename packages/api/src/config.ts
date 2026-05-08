@@ -16,6 +16,7 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z.string().min(64).optional(),
   SENTRY_DSN: z.string().optional(),
   API_URL: z.string().default('http://localhost:3001'),
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 function loadConfig() {
