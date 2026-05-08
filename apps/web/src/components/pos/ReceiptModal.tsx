@@ -68,6 +68,15 @@ export function ReceiptModal({
       y += 4;
     }
 
+    // NTN (FBR) — show when configured
+    if (business?.tax_id) {
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`NTN: ${business.tax_id}`, pageWidth / 2, y, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      y += 4;
+    }
+
     // Divider
     y += 1;
     doc.setDrawColor('#E2E8F0');
@@ -125,7 +134,15 @@ export function ReceiptModal({
       y += lineH;
     }
 
-    doc.text('GST (17%)', 5, y);
+    // FBR GST breakdown — show taxable amount separately when NTN is configured
+    if (business?.tax_id) {
+      const taxableAmount = Math.round((subtotal - discountAmount) * 100) / 100;
+      doc.text('Taxable Amount', 5, y);
+      doc.text(formatRs(taxableAmount), pageWidth - 5, y, { align: 'right' });
+      y += lineH;
+    }
+
+    doc.text(`GST (17%)`, 5, y);
     doc.text(formatRs(taxAmount), pageWidth - 5, y, { align: 'right' });
     y += lineH;
 
@@ -153,6 +170,13 @@ export function ReceiptModal({
     if (business?.phone) {
       doc.setFont('helvetica', 'normal');
       doc.text(`WhatsApp: ${business.phone}`, pageWidth / 2, y, { align: 'center' });
+      y += lineH;
+    }
+
+    // FBR verified footer
+    if (business?.tax_id) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('FBR Verified ✓', pageWidth / 2, y, { align: 'center' });
     }
 
     doc.autoPrint();
@@ -175,6 +199,19 @@ export function ReceiptModal({
         <div className="mb-6 rounded-xl bg-success/5 p-4 text-center">
           <p className="text-sm text-slate-600">Receipt #{receiptNumber}</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">{formatRs(total)}</p>
+          {business?.tax_id && (
+            <p className="mt-1 text-xs text-slate-500">NTN: {business.tax_id}</p>
+          )}
+          {taxAmount > 0 && (
+            <p className="mt-0.5 text-xs text-slate-500">
+              Taxable: {formatRs(subtotal - discountAmount)} | GST: {formatRs(taxAmount)}
+            </p>
+          )}
+          {business?.tax_id && (
+            <span className="mt-1 inline-flex items-center rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+              FBR Verified ✓
+            </span>
+          )}
           {!isOnline && (
             <p className="mt-1 text-xs text-warning">Saved offline — will sync when connected</p>
           )}

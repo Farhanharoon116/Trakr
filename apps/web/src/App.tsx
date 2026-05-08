@@ -10,6 +10,9 @@ import { InventoryPage } from './pages/inventory/InventoryPage';
 import { EmployeesPage } from './pages/hr/EmployeesPage';
 import { AttendancePage } from './pages/attendance/AttendancePage';
 import { ShiftsPage } from './pages/shifts/ShiftsPage';
+import { CustomersPage } from './pages/customers/CustomersPage';
+import { GSTReportPage } from './pages/reports/GSTReportPage';
+import { SettingsPage } from './pages/settings/SettingsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useAuthStore } from './store/auth.store';
 import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
@@ -108,6 +111,31 @@ export default function App() {
               element={
                 <RequireRole roles={['owner', 'manager', 'cashier']}>
                   <ShiftsPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <CustomersPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/reports/gst"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <GSTReportPage />
+                </RequireRole>
+              }
+            />
+            <Route path="/reports" element={<Navigate to="/reports/gst" replace />} />
+            <Route
+              path="/settings"
+              element={
+                <RequireRole roles={['owner']}>
+                  <SettingsPage />
                 </RequireRole>
               }
             />
