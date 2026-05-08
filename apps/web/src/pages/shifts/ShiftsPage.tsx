@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -90,7 +90,7 @@ function CloseShiftModal({ shift, onClose }: { shift: ShiftWithDetails; onClose:
     closing_cash: z.number({ invalid_type_error: 'Required' }).nonnegative(),
     notes: z.string().optional(),
   });
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<z.infer<typeof schema>>({
+  const { register, handleSubmit, watch, formState: { isSubmitting } } = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { closing_cash: 0 },
   });

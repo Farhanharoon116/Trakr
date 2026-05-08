@@ -78,9 +78,9 @@ describe('POS Cart calculations', () => {
     store.addToCart(mockProduct({ price: 100, tax_rate: 17 }));
     store.setDiscountType('flat');
     store.setDiscountValue(10);
-    // subtotal=100, discount=10, taxable=90, tax=15.30, total=95.30
+    // subtotal=100, discount=10, taxable=90, tax=15.30 (17% of 90), total=105.30
     const total = usePOSStore.getState().getTotal();
-    expect(total).toBeCloseTo(95.3, 1);
+    expect(total).toBeCloseTo(105.3, 1);
   });
 
   it('removes item from cart', () => {

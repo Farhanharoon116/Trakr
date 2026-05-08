@@ -81,7 +81,6 @@ function ProductModal({ product, categories, onClose, onSaved }: ProductModalPro
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),

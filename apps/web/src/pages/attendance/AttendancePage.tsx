@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { Clock, Download, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Clock, Download, CheckCircle, XCircle } from 'lucide-react';
 import { api } from '../../lib/api';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { EmptyState } from '../../components/shared/EmptyState';
-import type { Attendance, Employee, LeaveRequest } from '@bizos/shared';
+import type { Attendance, LeaveRequest } from '@bizos/shared';
 
 type Tab = 'today' | 'report' | 'leaves';
 
