@@ -6,6 +6,7 @@ import { SetupPage } from './pages/auth/SetupPage';
 import { POSPage } from './pages/pos/POSPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProductsPage } from './pages/products/ProductsPage';
+import { InventoryPage } from './pages/inventory/InventoryPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useAuthStore } from './store/auth.store';
 import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
@@ -72,6 +73,14 @@ export default function App() {
               element={
                 <RequireRole roles={['owner', 'manager']}>
                   <ProductsPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <InventoryPage />
                 </RequireRole>
               }
             />

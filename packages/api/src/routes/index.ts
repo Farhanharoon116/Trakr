@@ -10,12 +10,14 @@ import { employeeRouter } from './employees';
 import { attendanceRouter } from './attendance';
 import { shiftRouter } from './shifts';
 import { reportRouter } from './reports';
+import { categoryRouter } from './categories';
 
 export const apiRouter = Router();
 
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/businesses', businessRouter);
 apiRouter.use('/branches', branchRouter);
+apiRouter.use('/categories', categoryRouter);
 apiRouter.use('/products', productRouter);
 apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/sales', saleRouter);

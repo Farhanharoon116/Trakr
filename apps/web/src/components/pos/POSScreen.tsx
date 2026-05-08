@@ -7,17 +7,36 @@ import { ProductGrid } from './ProductGrid';
 import { Cart } from './Cart';
 import { ReceiptModal } from './ReceiptModal';
 import type { Product } from '@bizos/shared';
-import type { PaymentMethod } from '../../store/pos.store';
+import type { PaymentMethod, CartItemState } from '../../store/pos.store';
+
+interface CompletedSale {
+  receiptNumber: string;
+  total: number;
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  cartSnapshot: CartItemState[];
+  paymentMethod: string;
+}
 
 export function POSScreen() {
   const { user } = useAuthStore();
-  const { cart, addToCart, clearCart, getSubtotal, getDiscountAmount, getTaxAmount, getTotal, activeShift, discountType, discountValue, selectedCustomer } = usePOSStore();
+  const {
+    cart,
+    addToCart,
+    clearCart,
+    getSubtotal,
+    getDiscountAmount,
+    getTaxAmount,
+    getTotal,
+    activeShift,
+    discountType,
+    discountValue,
+    selectedCustomer,
+  } = usePOSStore();
   const { createSale, isCreating, isOnline } = useSales();
 
-  const [completedSale, setCompletedSale] = useState<{
-    receiptNumber: string;
-    total: number;
-  } | null>(null);
+  const [completedSale, setCompletedSale] = useState<CompletedSale | null>(null);
 
   const handleSelectProduct = useCallback(
     (product: Product) => {
@@ -42,6 +61,7 @@ export function POSScreen() {
         const discountAmount = getDiscountAmount();
         const taxAmount = getTaxAmount();
         const total = getTotal();
+        const cartSnapshot = [...cart];
 
         const saleData = {
           branch_id: branchId,
@@ -60,11 +80,12 @@ export function POSScreen() {
           total,
           payment_method: paymentMethod,
           offline_id: undefined,
-          notes: discountType === 'percent'
-            ? `Discount: ${discountValue}%`
-            : discountValue > 0
-            ? `Discount: Rs ${discountValue}`
-            : undefined,
+          notes:
+            discountType === 'percent'
+              ? `Discount: ${discountValue}%`
+              : discountValue > 0
+              ? `Discount: Rs ${discountValue}`
+              : undefined,
         };
 
         const result = await createSale(saleData);
@@ -74,13 +95,19 @@ export function POSScreen() {
           (result as { offline_id?: string }).offline_id ??
           'OFFLINE';
 
-        setCompletedSale({ receiptNumber, total });
+        setCompletedSale({
+          receiptNumber,
+          total,
+          subtotal,
+          discountAmount,
+          taxAmount,
+          cartSnapshot,
+          paymentMethod,
+        });
         clearCart();
 
         if (!isOnline) {
-          toast('Sale saved offline — will sync when connected', {
-            icon: '📡',
-          });
+          toast('Sale saved offline — will sync when connected', { icon: '📡' });
         } else {
           toast.success(`Sale completed! Receipt: ${receiptNumber}`);
         }
@@ -123,6 +150,11 @@ export function POSScreen() {
         <ReceiptModal
           receiptNumber={completedSale.receiptNumber}
           total={completedSale.total}
+          subtotal={completedSale.subtotal}
+          discountAmount={completedSale.discountAmount}
+          taxAmount={completedSale.taxAmount}
+          cartItems={completedSale.cartSnapshot}
+          paymentMethod={completedSale.paymentMethod}
           isOnline={isOnline}
           onClose={() => setCompletedSale(null)}
         />
