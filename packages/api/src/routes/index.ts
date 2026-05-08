@@ -11,6 +11,7 @@ import { attendanceRouter } from './attendance';
 import { shiftRouter } from './shifts';
 import { reportRouter } from './reports';
 import { categoryRouter } from './categories';
+import { leaveRequestRouter } from './leave-requests';
 
 export const apiRouter = Router();
 
@@ -25,4 +26,5 @@ apiRouter.use('/customers', customerRouter);
 apiRouter.use('/employees', employeeRouter);
 apiRouter.use('/attendance', attendanceRouter);
 apiRouter.use('/shifts', shiftRouter);
+apiRouter.use('/leave-requests', leaveRequestRouter);
 apiRouter.use('/reports', reportRouter);

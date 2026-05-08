@@ -7,6 +7,9 @@ import { POSPage } from './pages/pos/POSPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
+import { EmployeesPage } from './pages/hr/EmployeesPage';
+import { AttendancePage } from './pages/attendance/AttendancePage';
+import { ShiftsPage } from './pages/shifts/ShiftsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useAuthStore } from './store/auth.store';
 import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
@@ -81,6 +84,30 @@ export default function App() {
               element={
                 <RequireRole roles={['owner', 'manager']}>
                   <InventoryPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/employees"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <EmployeesPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/attendance"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <AttendancePage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/shifts"
+              element={
+                <RequireRole roles={['owner', 'manager', 'cashier']}>
+                  <ShiftsPage />
                 </RequireRole>
               }
             />
