@@ -13,9 +13,10 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  const allowedOrigin = process.env['VITE_APP_URL'];
+  const allowedOrigin = process.env['VITE_APP_URL'] ??
+    (process.env['NODE_ENV'] !== 'production' ? 'http://localhost:5173' : false);
   app.use(cors({
-    origin: allowedOrigin ? allowedOrigin : false,
+    origin: allowedOrigin,
     credentials: true,
   }));
   app.use(compression());

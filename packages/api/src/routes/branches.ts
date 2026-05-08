@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { supabase } from '../db';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { NotFoundError } from '../utils/errors';
+import { AppError, NotFoundError } from '../utils/errors';
 
 export const branchRouter = Router();
 branchRouter.use(authMiddleware);
@@ -17,7 +17,7 @@ branchRouter.get(
       .eq('business_id', req.user.businessId)
       .eq('is_active', true)
       .order('name');
-    if (error) throw new NotFoundError('Could not fetch branches');
+    if (error) throw new AppError('Could not fetch branches', 500);
     res.json(data);
   })
 );
@@ -38,7 +38,7 @@ branchRouter.post(
       .insert({ ...body, business_id: req.user.businessId })
       .select()
       .single();
-    if (error) throw new NotFoundError('Could not create branch');
+    if (error) throw new AppError('Could not create branch', 500);
     res.status(201).json(data);
   })
 );

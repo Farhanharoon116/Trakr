@@ -4,7 +4,7 @@ import { supabase } from '../db';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { parsePagination } from '../utils/pagination';
-import { NotFoundError } from '../utils/errors';
+import { AppError, NotFoundError } from '../utils/errors';
 
 export const productRouter = Router();
 productRouter.use(authMiddleware);
@@ -31,7 +31,7 @@ productRouter.get(
     if (isActive !== undefined) query = query.eq('is_active', isActive === 'true');
 
     const { data, error, count } = await query;
-    if (error) throw new NotFoundError('Could not fetch products');
+    if (error) throw new AppError('Could not fetch products', 500);
     res.json({ data, total: count ?? 0, page, limit });
   })
 );
@@ -46,7 +46,7 @@ productRouter.post(
       .insert({ ...body, business_id: req.user.businessId })
       .select()
       .single();
-    if (error) throw new NotFoundError('Could not create product');
+    if (error) throw new AppError('Could not create product', 500);
     res.status(201).json(data);
   })
 );

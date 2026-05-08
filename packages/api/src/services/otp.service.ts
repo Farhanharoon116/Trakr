@@ -83,5 +83,5 @@ async function sendViaMSG91(phone: string, otp: string): Promise<void> {
 
 // For testing: generate a deterministic token (not used in production)
 export function _generateTestOTP(): string {
-  return crypto.randomInt(100000, 999999).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
