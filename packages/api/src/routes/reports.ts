@@ -48,7 +48,7 @@ reportRouter.get(
         .from('attendance')
         .select('id, employee_id')
         .eq('business_id', req.user.businessId)
-        .gte('date', todayStart.split('T')[0] ?? todayStart)
+        .gte('date', todayStart.split('T')[0])
         .eq('status', 'present'),
     ]);
 
@@ -70,11 +70,11 @@ reportRouter.get(
     const salesByDay = new Map<string, number>();
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      const key = d.toISOString().split('T')[0] ?? d.toISOString();
+      const key = d.toISOString().split('T')[0];
       salesByDay.set(key, 0);
     }
     for (const sale of (allSales.data ?? [])) {
-      const day = (sale.created_at as string).split('T')[0] ?? (sale.created_at as string);
+      const day = (sale.created_at as string).split('T')[0];
       salesByDay.set(day, (salesByDay.get(day) ?? 0) + (sale.total as number));
     }
     const salesChart = Array.from(salesByDay.entries()).map(([date, revenue]) => ({

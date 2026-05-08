@@ -20,6 +20,20 @@ interface ProductsResponse {
   limit: number;
 }
 
+/** Validate an image URL using the URL constructor so only safe protocols are rendered. */
+function sanitizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:' && parsed.protocol !== 'blob:') {
+      return null;
+    }
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 function formatRs(n: number) {
   return `Rs ${n.toLocaleString('en-PK', { maximumFractionDigits: 0 })}`;
 }
@@ -57,8 +71,11 @@ function ProductModal({ product, categories, onClose, onSaved }: ProductModalPro
   const createCategory = useCreateCategory();
   const [newCatName, setNewCatName] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(product?.image_url ?? null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Sanitize using URL constructor so only safe protocols reach the img src
+  const safePreview = sanitizeImageUrl(imagePreview) ?? sanitizeImageUrl(product?.image_url);
 
   const {
     register,
@@ -126,6 +143,15 @@ function ProductModal({ product, categories, onClose, onSaved }: ProductModalPro
     setNewCatName('');
   };
 
+  const handleCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCategory().catch((err: unknown) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to create category');
+      });
+    }
+  };
+
   const onSubmit = async (values: ProductFormValues) => {
     let imageUrl = values.image_url ?? null;
     if (imageFile) {
@@ -161,8 +187,8 @@ function ProductModal({ product, categories, onClose, onSaved }: ProductModalPro
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Product Image</label>
             <div className="flex items-center gap-3">
-              {imagePreview ? (
-                <img src={imagePreview} alt="preview" className="h-16 w-16 rounded-lg object-cover" />
+              {safePreview ? (
+                <img src={safePreview} alt="preview" className="h-16 w-16 rounded-lg object-cover" />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100">
                   <Package className="h-6 w-6 text-slate-300" />
@@ -210,11 +236,11 @@ function ProductModal({ product, categories, onClose, onSaved }: ProductModalPro
                 value={newCatName}
                 onChange={(e) => setNewCatName(e.target.value)}
                 className="flex-1 rounded-lg border border-border px-2 py-1 text-xs focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') { e.preventDefault(); handleAddCategory().catch(() => void 0); }
-                }}
+                onKeyDown={handleCategoryKeyDown}
               />
-              <button type="button" onClick={() => handleAddCategory().catch(() => void 0)} className="rounded-lg bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+              <button type="button" onClick={() => handleAddCategory().catch((err: unknown) => {
+                toast.error(err instanceof Error ? err.message : 'Failed to create category');
+              })} className="rounded-lg bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                 Add
               </button>
             </div>
