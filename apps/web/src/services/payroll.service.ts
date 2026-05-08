@@ -1,5 +1,13 @@
-import { isWeekend } from 'date-fns';
 import type { Employee, Attendance } from '@bizos/shared';
+
+/**
+ * Determine whether a date is a non-working day.
+ * Pakistani businesses commonly work Mon–Sat (Sunday off only).
+ * Pass `offDays` to override (e.g. [0, 5] for Sun+Fri or [0, 6] for Sun+Sat).
+ */
+function isOffDay(date: Date, offDays: number[] = [0]): boolean {
+  return offDays.includes(date.getDay());
+}
 
 export interface PayrollResult {
   working_days: number;
@@ -28,7 +36,7 @@ export function calculateMonthlySalary(
   const daysInMonth = new Date(year, mon + 1, 0).getDate();
   let working_days = 0;
   for (let d = 1; d <= daysInMonth; d++) {
-    if (!isWeekend(new Date(year, mon, d))) working_days++;
+    if (!isOffDay(new Date(year, mon, d))) working_days++;
   }
 
   const days_present = attendanceRecords.filter(
