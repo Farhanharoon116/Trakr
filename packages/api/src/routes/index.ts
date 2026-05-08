@@ -1,0 +1,26 @@
+import { Router } from 'express';
+import { authRouter } from './auth';
+import { businessRouter } from './businesses';
+import { branchRouter } from './branches';
+import { productRouter } from './products';
+import { inventoryRouter } from './inventory';
+import { saleRouter } from './sales';
+import { customerRouter } from './customers';
+import { employeeRouter } from './employees';
+import { attendanceRouter } from './attendance';
+import { shiftRouter } from './shifts';
+import { reportRouter } from './reports';
+
+export const apiRouter = Router();
+
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/businesses', businessRouter);
+apiRouter.use('/branches', branchRouter);
+apiRouter.use('/products', productRouter);
+apiRouter.use('/inventory', inventoryRouter);
+apiRouter.use('/sales', saleRouter);
+apiRouter.use('/customers', customerRouter);
+apiRouter.use('/employees', employeeRouter);
+apiRouter.use('/attendance', attendanceRouter);
+apiRouter.use('/shifts', shiftRouter);
+apiRouter.use('/reports', reportRouter);
