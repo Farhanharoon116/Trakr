@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizOS — Enterprise UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --brand-500: #2563EB;
+  --brand-600: #1D4ED8;
+  --brand-700: #1E40AF;
+  --brand-400: #3B82F6;
+  --brand-50:  #EFF6FF;
+  --brand-100: #DBEAFE;
+
+  /* Neutrals */
+  --gray-950: #0A0E1A;
+  --gray-900: #111827;
+  --gray-850: #161D2F;
+  --gray-800: #1F2937;
+  --gray-700: #374151;
+  --gray-600: #4B5563;
+  --gray-500: #6B7280;
+  --gray-400: #9CA3AF;
+  --gray-300: #D1D5DB;
+  --gray-200: #E5E7EB;
+  --gray-100: #F3F4F6;
+  --gray-50:  #F9FAFB;
+  --white:    #FFFFFF;
+
+  /* Semantic */
+  --success-500: #10B981;
+  --success-50:  #ECFDF5;
+  --success-100: #D1FAE5;
+  --warning-500: #F59E0B;
+  --warning-50:  #FFFBEB;
+  --warning-100: #FEF3C7;
+  --danger-500:  #EF4444;
+  --danger-50:   #FEF2F2;
+  --danger-100:  #FEE2E2;
+  --purple-500:  #8B5CF6;
+  --purple-50:   #F5F3FF;
+  --orange-500:  #F97316;
+  --orange-50:   #FFF7ED;
+
+  /* Sidebar */
+  --sb-bg:     #0F1623;
+  --sb-border: rgba(255,255,255,0.06);
+  --sb-hover:  rgba(255,255,255,0.05);
+  --sb-active: rgba(37,99,235,0.18);
+  --sb-text:   rgba(255,255,255,0.55);
+  --sb-text-active: #FFFFFF;
+
+  /* Surfaces */
+  --surface-0: #F4F6FA;
+  --surface-1: #FFFFFF;
+  --surface-2: #F9FAFB;
+  --border-default: #E5E7EB;
+  --border-strong:  #D1D5DB;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+
+  /* Spacing (8pt grid) */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+
+  /* Radius */
+  --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 20px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+/* ─── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font-sans);
+  background: #080D17;
+  color: var(--gray-900);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 60px;
+  -webkit-font-smoothing: antialiased;
+}
+input, select, button, textarea {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+button { cursor: pointer; }
+a { text-decoration: none; }
+
+/* ─── NAV STRIP ─────────────────────────────────────────────── */
+.nav-strip {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 20px; justify-content: center;
+  max-width: 1200px; width: 100%;
+}
+.nav-strip button {
+  font-size: 11.5px; font-weight: 500; letter-spacing: 0.01em;
+  padding: 6px 14px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6);
+  transition: all 0.15s ease;
+}
+.nav-strip button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav-strip button.active { background: var(--brand-500); color: #fff; border-color: var(--brand-500); }
+
+/* ─── DEVICE WRAPPER ─────────────────────────────────────────── */
+.device {
+  width: 100%; max-width: 1200px;
+  background: var(--surface-0);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), var(--shadow-xl);
+  min-height: 720px;
+  position: relative;
+}
+.screen { display: none; min-height: 720px; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ─── SCREEN TAG ─────────────────────────────────────────────── */
+.stag {
+  position: absolute; top: 12px; right: 12px; z-index: 200;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+  color: rgba(255,255,255,0.6); font-size: 10.5px; font-weight: 500;
+  padding: 3px 10px; border-radius: 999px; pointer-events: none;
+  letter-spacing: 0.03em;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SCREEN: LOGIN
+══════════════════════════════════════════════════════════════ */
+#sc-login {
+  background: var(--gray-950);
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.login-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 50%, rgba(37,99,235,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 80% 20%, rgba(139,92,246,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 300px at 60% 80%, rgba(16,185,129,0.05) 0%, transparent 70%);
+}
+/* Subtle grid */
+.login-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.login-wrap {
+  display: flex; align-items: center; gap: 80px;
+  position: relative; z-index: 2; padding: 40px 20px;
+}
+.login-brand { flex-shrink: 0; }
+.login-brand-logo {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.lb-mark {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--brand-500), #4F46E5);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 24px rgba(37,99,235,0.4);
+}
+.lb-mark svg { width: 24px; height: 24px; }
+.lb-text {
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 800;
+  color: #fff; letter-spacing: -0.5px;
+}
+.lb-text em { color: var(--brand-400); font-style: normal; }
+.login-brand h2 {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 700;
+  color: #fff; line-height: 1.3;
+  margin-bottom: 12px;
+}
+.login-brand p {
+  font-size: 13.5px; line-height: 1.7;
+  color: rgba(255,255,255,0.45);
+  max-width: 320px;
+}
+.login-features {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 28px;
+}
+.lf-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.lf-row svg { flex-shrink: 0; color: var(--brand-400); }
+.lf-row span { font-size: 12.5px; color: rgba(255,255,255,0.5); }
+/* Login card */
+.login-card {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-xl);
+  padding: 36px 32px;
+  width: 400px;
+  flex-shrink: 0;
+}
+.login-card-title {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 700;
+  color: #fff; margin-bottom: 4px;
+}
+.login-card-sub {
+  font-size: 12.5px; color: rgba(255,255,255,0.45);
+  margin-bottom: 28px;
+}
+.login-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-md);
+  padding: 3px; margin-bottom: 22px;
+}
+.ltab {
+  flex: 1; text-align: center;
+  padding: 7px; border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer; transition: all 0.15s;
+}
+.ltab.active { background: var(--brand-500); color: #fff; }
+
+.f-label {
+  font-size: 11.5px; font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  margin-bottom: 6px; display: block;
+}
+.f-input {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-md);
+  padding: 10px 13px;
+  color: #fff; font-size: 13.5px;
+  outline: none;
+  transition: border 0.15s, box-shadow 0.15s;
+  margin-bottom: 14px;
+}
+.f-input:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+.f-input::placeholder { color: rgba(255,255,255,0.2); }
+.otp-group { display: flex; gap: 8px; margin-bottom: 14px; }
+.otp-cell {
+  flex: 1; height: 48px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-md);
+  color: #fff; font-size: 20px; font-weight: 700;
+  text-align: center;
+  font-family: var(--font-display);
+  outline: none;
+}
+.otp-cell.filled { border-color: var(--brand-500); }
+.otp-cell.cursor { border-color: var(--brand-400); box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+.otp-hint { font-size: 11.5px; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+.otp-hint a { color: var(--brand-400); cursor: pointer; }
+.btn-login {
+  width: 100%;
+  background: linear-gradient(135deg, var(--brand-500), #4F46E5);
+  color: #fff; border: none;
+  border-radius: var(--r-md); padding: 12px;
+  font-size: 13.5px; font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+  transition: opacity 0.15s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-login:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-login:active { transform: translateY(0); }
+.login-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 18px 0;
+}
+.login-divider::before, .login-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.login-divider span { font-size: 11.5px; color: rgba(255,255,255,0.25); }
+.qr-tile {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-md); padding: 13px 15px;
+  cursor: pointer; transition: background 0.15s;
+}
+.qr-tile:hover { background: rgba(255,255,255,0.08); }
+.qr-box-mini {
+  width: 44px; height: 44px; flex-shrink: 0;
+  background: #fff; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.qr-tile-info strong { display: block; font-size: 12.5px; color: #fff; margin-bottom: 2px; }
+.qr-tile-info span { font-size: 11.5px; color: rgba(255,255,255,0.4); }
+
+/* ══════════════════════════════════════════════════════════════
+   SCREEN: ONBOARDING
+══════════════════════════════════════════════════════════════ */
+#sc-onboard { background: #fff; flex-direction: row; }
+.ob-sidebar {
+  width: 280px; flex-shrink: 0;
+  background: var(--gray-950);
+  padding: 36px 28px;
+  display: flex; flex-direction: column;
+}
+.ob-brand {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 40px;
+}
+.ob-brand .lb-mark { width: 36px; height: 36px; border-radius: 9px; }
+.ob-brand .lb-mark svg { width: 18px; height: 18px; }
+.ob-brand span {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 800; color: #fff;
+}
+.ob-steps { display: flex; flex-direction: column; gap: 0; }
+.ob-step {
+  display: flex; gap: 14px;
+  padding-bottom: 28px; position: relative;
+}
+.ob-step:not(:last-child)::after {
+  content: ''; position: absolute;
+  left: 15px; top: 32px;
+  width: 1px; height: calc(100% - 12px);
+  background: rgba(255,255,255,0.08);
+}
+.ob-dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  flex-shrink: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  font-family: var(--font-display);
+}
+.ob-dot.done { background: var(--success-500); color: #fff; }
+.ob-dot.active {
+  background: var(--brand-500); color: #fff;
+  box-shadow: 0 0 0 5px rgba(37,99,235,0.2);
+}
+.ob-dot.pending {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+}
+.ob-step-text { padding-top: 5px; }
+.ob-step-text strong {
+  display: block; font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.9); margin-bottom: 2px;
+}
+.ob-step-text span { font-size: 11.5px; color: rgba(255,255,255,0.35); }
+.ob-content {
+  flex: 1; padding: 44px 48px 36px;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.ob-progress-bar {
+  height: 3px; background: var(--gray-200);
+  border-radius: 99px; margin-bottom: 32px;
+}
+.ob-progress-fill {
+  height: 100%; width: 33%;
+  background: linear-gradient(90deg, var(--brand-500), #4F46E5);
+  border-radius: 99px; transition: width 0.4s ease;
+}
+.ob-head { margin-bottom: 28px; }
+.ob-head h2 {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: var(--gray-900); margin-bottom: 6px;
+}
+.ob-head p { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-grid.full { grid-template-columns: 1fr; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fl {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--gray-600); letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.fi {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-md);
+  padding: 9px 12px;
+  font-size: 13px; color: var(--gray-900);
+  outline: none; background: #fff;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+.fi:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.fs {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-md);
+  padding: 9px 12px;
+  font-size: 13px; color: var(--gray-900);
+  outline: none; background: #fff;
+  cursor: pointer; width: 100%;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+.btype-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 20px;
+}
+.btype-card {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-lg);
+  padding: 16px 10px;
+  text-align: center; cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.btype-card:hover { border-color: var(--brand-400); background: var(--brand-50); }
+.btype-card.sel {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.btype-card.sel::after {
+  content: '';
+  position: absolute; top: 8px; right: 8px;
+  width: 16px; height: 16px;
+  background: var(--brand-500);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.btype-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray-100);
+}
+.btype-card.sel .btype-icon { background: var(--brand-100); }
+.btype-icon svg { width: 20px; height: 20px; }
+.btype-card p { font-size: 12.5px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+.btype-card small { font-size: 11px; color: var(--gray-400); }
+.ob-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: auto; padding-top: 24px;
+  border-top: 1px solid var(--gray-100);
+}
+.ob-footer-left { font-size: 12px; color: var(--gray-400); }
+.ob-footer-btns { display: flex; gap: 10px; }
+.btn-secondary {
+  background: none; border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-md); padding: 9px 20px;
+  font-size: 13px; font-weight: 500; color: var(--gray-700);
+  transition: all 0.15s;
+}
+.btn-secondary:hover { border-color: var(--gray-400); background: var(--gray-50); }
+.btn-primary-light {
+  background: var(--brand-500); color: #fff; border: none;
+  border-radius: var(--r-md); padding: 9px 22px;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.3);
+}
+.btn-primary-light:hover { background: var(--brand-600); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
+
+/* ══════════════════════════════════════════════════════════════
+   APP SHELL (sidebar + header + content)
+══════════════════════════════════════════════════════════════ */
+.app-shell { display: flex; flex: 1; min-height: 720px; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  background: var(--sb-bg);
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--sb-border);
+}
+.sb-top {
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid var(--sb-border);
+}
+.sb-logo {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 14px;
+}
+.sb-logo .lb-mark { width: 30px; height: 30px; border-radius: 7px; }
+.sb-logo .lb-mark svg { width: 15px; height: 15px; }
+.sb-logo span {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 800; color: #fff;
+}
+.sb-biz-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sb-biz-card:hover { background: rgba(255,255,255,0.08); }
+.sb-biz-name { font-size: 12.5px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+.sb-biz-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: rgba(255,255,255,0.35);
+}
+.sb-biz-meta .status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success-500); flex-shrink: 0;
+}
+.sb-body { flex: 1; padding: 8px 8px; overflow-y: auto; }
+.sb-section-label {
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 10px 4px;
+}
+.sb-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  color: var(--sb-text);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  position: relative;
+  user-select: none;
+}
+.sb-link:hover { background: var(--sb-hover); color: rgba(255,255,255,0.9); }
+.sb-link.active {
+  background: var(--sb-active); color: var(--sb-text-active);
+}
+.sb-link.active::before {
+  content: ''; position: absolute;
+  left: 0; top: 5px; bottom: 5px;
+  width: 2.5px;
+  background: var(--brand-400);
+  border-radius: 0 2px 2px 0;
+}
+.sb-link svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.sb-link.active svg { opacity: 1; color: var(--brand-400); }
+.sb-badge {
+  margin-left: auto;
+  background: var(--danger-500);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 999px;
+  min-width: 18px; text-align: center;
+}
+.sb-badge.amber { background: var(--warning-500); color: var(--gray-900); }
+.sb-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--sb-border);
+}
+.sb-user {
+  display: flex; align-items: center; gap: 10px;
+}
+.sb-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-500), #4F46E5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11.5px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.sb-user-name { font-size: 12.5px; font-weight: 600; color: #fff; }
+.sb-user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* MAIN AREA */
+.main { flex: 1; display: flex; flex-direction: column; background: var(--surface-0); overflow: hidden; }
+
+/* TOP BAR */
+.topbar {
+  height: 56px; background: var(--surface-1);
+  border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 15.5px; font-weight: 700;
+  color: var(--gray-900); flex: 1;
+}
+.topbar-search {
+  flex: 0 0 260px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--r-md);
+  padding: 7px 12px;
+  display: flex; align-items: center; gap: 8px;
+  transition: border 0.15s;
+}
+.topbar-search:focus-within {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+}
+.topbar-search input {
+  border: none; background: none; outline: none;
+  font-size: 13px; color: var(--gray-800); flex: 1;
+}
+.topbar-search input::placeholder { color: var(--gray-400); }
+.topbar-search svg { color: var(--gray-400); flex-shrink: 0; }
+.tb-icon-btn {
+  width: 34px; height: 34px; border-radius: var(--r-md);
+  border: 1.5px solid var(--border-default);
+  background: var(--surface-1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-500);
+  cursor: pointer; transition: all 0.15s;
+  position: relative; flex-shrink: 0;
+}
+.tb-icon-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+.tb-notif-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--danger-500);
+  border: 1.5px solid var(--surface-1);
+}
+.add-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--brand-500); color: #fff;
+  border: none; border-radius: var(--r-md);
+  padding: 7px 14px; font-size: 12.5px; font-weight: 600;
+  transition: all 0.15s;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.25);
+}
+.add-btn:hover { background: var(--brand-600); transform: translateY(-1px); }
+.add-btn svg { width: 14px; height: 14px; }
+
+/* CONTENT AREA */
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+.content-inner { max-width: 100%; }
+
+/* ── STAT CARDS ── */
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.kpi {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  position: relative; overflow: hidden;
+}
+.kpi::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+.kpi.blue::before { background: var(--brand-500); }
+.kpi.green::before { background: var(--success-500); }
+.kpi.amber::before { background: var(--warning-500); }
+.kpi.purple::before { background: var(--purple-500); }
+.kpi-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.kpi-label { font-size: 11.5px; font-weight: 600; color: var(--gray-500); letter-spacing: 0.03em; text-transform: uppercase; }
+.kpi-icon {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon.blue { background: var(--brand-50); color: var(--brand-500); }
+.kpi-icon.green { background: var(--success-50); color: var(--success-500); }
+.kpi-icon.amber { background: var(--warning-50); color: var(--warning-500); }
+.kpi-icon.purple { background: var(--purple-50); color: var(--purple-500); }
+.kpi-icon svg { width: 16px; height: 16px; }
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 700;
+  color: var(--gray-900); line-height: 1;
+  margin-bottom: 6px;
+}
+.kpi-delta {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px;
+}
+.kpi-delta .up { color: var(--success-500); font-weight: 600; }
+.kpi-delta .dn { color: var(--danger-500); font-weight: 600; }
+.kpi-delta .kpi-vs { color: var(--gray-400); }
+
+/* ── CHARTS ROW ── */
+.charts-row { display: grid; grid-template-columns: 1fr 320px; gap: 14px; margin-bottom: 22px; }
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 0;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 700; color: var(--gray-800);
+}
+.card-head-right { display: flex; align-items: center; gap: 8px; }
+.period-sel {
+  font-size: 12px; color: var(--gray-500);
+  background: var(--surface-2); border: 1px solid var(--border-default);
+  border-radius: 6px; padding: 4px 10px;
+  cursor: pointer;
+}
+.card-body { padding: 0 20px 20px; }
+
+/* Bar chart */
+.bar-chart-wrap { padding: 0 0 4px; }
+.bc-bars { display: flex; align-items: flex-end; gap: 6px; height: 90px; }
+.bc-bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  background: var(--brand-100);
+  cursor: pointer; transition: background 0.15s;
+  position: relative;
+}
+.bc-bar:hover { background: var(--brand-200, #BFDBFE); }
+.bc-bar.active { background: var(--brand-500); }
+.bc-bar-tooltip {
+  position: absolute; bottom: calc(100% + 6px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--gray-900); color: #fff;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 7px; border-radius: 4px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.12s;
+}
+.bc-bar:hover .bc-bar-tooltip { opacity: 1; }
+.bc-labels { display: flex; gap: 6px; margin-top: 7px; }
+.bc-lbl { flex: 1; text-align: center; font-size: 10px; color: var(--gray-400); }
+
+/* Donut */
+.donut-area { display: flex; align-items: center; gap: 20px; }
+.donut-legend { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.dleg-row { display: flex; align-items: center; gap: 8px; }
+.dleg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dleg-name { font-size: 12.5px; color: var(--gray-700); flex: 1; }
+.dleg-val { font-size: 12.5px; font-weight: 600; color: var(--gray-900); }
+
+/* ── TABLE ── */
+.table-card { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.tc-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border-default);
+}
+.tc-head-left { display: flex; align-items: center; gap: 12px; }
+.tc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--gray-800); }
+.tc-count {
+  background: var(--gray-100); color: var(--gray-600);
+  font-size: 11.5px; font-weight: 600;
+  padding: 2px 8px; border-radius: 999px;
+}
+.btn-text { background: none; border: none; font-size: 12.5px; font-weight: 600; color: var(--brand-500); cursor: pointer; }
+.btn-text:hover { color: var(--brand-600); }
+.dt { width: 100%; border-collapse: collapse; }
+.dt th {
+  font-size: 11px; font-weight: 700; color: var(--gray-400);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 10px 20px; text-align: left;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+}
+.dt td {
+  padding: 12px 20px;
+  font-size: 13px; color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+.dt tr:last-child td { border-bottom: none; }
+.dt tr:hover td { background: #FAFBFF; }
+.dt td strong { color: var(--gray-900); font-weight: 600; }
+.dt td .sub { font-size: 11.5px; color: var(--gray-400); margin-top: 1px; }
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600;
+  white-space: nowrap;
+}
+.badge-green { background: var(--success-50); color: var(--success-500); }
+.badge-amber { background: var(--warning-50); color: #B45309; }
+.badge-red { background: var(--danger-50); color: var(--danger-500); }
+.badge-blue { background: var(--brand-50); color: var(--brand-600); }
+.badge-purple { background: var(--purple-50); color: var(--purple-500); }
+.badge-gray { background: var(--gray-100); color: var(--gray-600); }
+
+/* ══════════════════════════════════════════════════════════════
+   POS SCREEN
+══════════════════════════════════════════════════════════════ */
+#sc-pos { background: var(--gray-950); min-height: 720px; }
+#sc-pos .app-shell { min-height: 720px; }
+
+.pos-sidebar {
+  width: 240px; flex-shrink: 0;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+  display: flex; flex-direction: column;
+}
+.pos-content {
+  flex: 1; display: flex; flex-direction: column;
+  background: #F0F2F8; overflow: hidden;
+}
+.pos-topbar {
+  height: 56px; background: var(--surface-1);
+  border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 12px; flex-shrink: 0;
+}
+.pos-topbar .topbar-title { font-size: 14px; }
+.pos-shift-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--success-50); border: 1px solid var(--success-100);
+  color: var(--success-500);
+  font-size: 12px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+}
+.pos-shift-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success-500); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.pos-body { display: flex; flex: 1; overflow: hidden; }
+.pos-left {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 16px; gap: 12px; overflow-y: auto;
+}
+.pos-search-bar {
+  background: var(--surface-1);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--r-lg);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-xs);
+  transition: border 0.15s;
+}
+.pos-search-bar:focus-within { border-color: var(--brand-400); }
+.pos-search-bar input { border: none; background: none; outline: none; flex: 1; font-size: 13.5px; color: var(--gray-800); }
+.pos-search-bar input::placeholder { color: var(--gray-400); }
+.scan-btn {
+  background: var(--brand-50); color: var(--brand-600);
+  border: 1px solid var(--brand-100); border-radius: 6px;
+  padding: 5px 10px; font-size: 11.5px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  transition: all 0.15s;
+}
+.scan-btn:hover { background: var(--brand-100); }
+.scan-btn svg { width: 13px; height: 13px; }
+
+.cat-pills { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+.cat-pill {
+  white-space: nowrap;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 500;
+  border: 1.5px solid var(--border-default);
+  background: var(--surface-1); color: var(--gray-600);
+  cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+}
+.cat-pill:hover { border-color: var(--brand-300, #93C5FD); color: var(--brand-600); }
+.cat-pill.active { background: var(--brand-500); color: #fff; border-color: var(--brand-500); }
+
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.prod-card {
+  background: var(--surface-1);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--r-lg); padding: 12px;
+  cursor: pointer; transition: all 0.12s;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.prod-card:hover { border-color: var(--brand-400); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.prod-card.out { opacity: 0.5; cursor: not-allowed; }
+.prod-card.out:hover { transform: none; box-shadow: var(--shadow-xs); border-color: var(--border-default); }
+.prod-img {
+  width: 100%; aspect-ratio: 1;
+  background: var(--gray-100); border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.prod-img svg { width: 28px; height: 28px; color: var(--gray-300); }
+.prod-img.colored { background: var(--brand-50); }
+.prod-img.colored svg { color: var(--brand-400); }
+.prod-name { font-size: 12.5px; font-weight: 600; color: var(--gray-800); margin-bottom: 3px; line-height: 1.3; }
+.prod-sku { font-size: 10.5px; color: var(--gray-400); margin-bottom: 5px; font-family: monospace; }
+.prod-footer { display: flex; align-items: center; justify-content: space-between; }
+.prod-price { font-size: 14px; font-weight: 700; color: var(--brand-600); font-family: var(--font-display); }
+.prod-stock { font-size: 10.5px; color: var(--gray-400); }
+.prod-stock.low { color: var(--warning-500); font-weight: 600; }
+.prod-stock.out-text { color: var(--danger-500); font-weight: 600; }
+.prod-add-btn {
+  position: absolute; top: 8px; right: 8px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--brand-500); color: #fff; border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1;
+  opacity: 0; transition: opacity 0.12s;
+  box-shadow: var(--shadow-sm);
+}
+.prod-card:hover .prod-add-btn { opacity: 1; }
+
+/* ORDER PANEL */
+.order-panel {
+  width: 320px; flex-shrink: 0;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border-default);
+  display: flex; flex-direction: column;
+}
+.op-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.op-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.op-actions { display: flex; gap: 6px; }
+.op-icon-btn {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  border: 1px solid var(--border-default);
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-500); cursor: pointer; transition: all 0.12s;
+}
+.op-icon-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+.op-icon-btn.danger:hover { background: var(--danger-50); color: var(--danger-500); border-color: var(--danger-100); }
+.op-icon-btn svg { width: 13px; height: 13px; }
+
+.op-customer {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+.op-customer-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  border: 1.5px dashed var(--border-default);
+  cursor: pointer; transition: all 0.12s;
+  color: var(--gray-500); font-size: 12.5px;
+}
+.op-customer-row:hover { border-color: var(--brand-300, #93C5FD); background: var(--brand-50); color: var(--brand-600); }
+.op-customer-row svg { width: 14px; height: 14px; flex-shrink: 0; }
+.op-customer-found {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  background: var(--success-50); border: 1px solid var(--success-100);
+}
+.op-cf-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--success-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.op-cf-name { font-size: 12.5px; font-weight: 600; color: var(--gray-800); }
+.op-cf-pts { font-size: 11px; color: var(--success-500); font-weight: 500; }
+.op-cf-pts span { font-weight: 700; }
+
+.op-items { flex: 1; overflow-y: auto; padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; }
+.oi-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--gray-100);
+  transition: border 0.12s;
+}
+.oi-row:hover { border-color: var(--gray-200); }
+.oi-icon {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  background: var(--brand-50); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.oi-icon svg { width: 16px; height: 16px; color: var(--brand-400); }
+.oi-info { flex: 1; min-width: 0; }
+.oi-name { font-size: 12.5px; font-weight: 600; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.oi-price { font-size: 11.5px; color: var(--gray-400); }
+.oi-qty { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.qty-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border-default);
+  background: var(--surface-1); color: var(--gray-600);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; line-height: 1;
+  transition: all 0.12s;
+}
+.qty-btn:hover { border-color: var(--brand-400); color: var(--brand-600); background: var(--brand-50); }
+.qty-val { font-size: 13px; font-weight: 700; color: var(--gray-900); min-width: 18px; text-align: center; }
+
+.op-summary {
+  border-top: 1px solid var(--border-default);
+  padding: 14px 16px;
+}
+.sum-row {
+  display: flex; justify-content: space-between;
+  font-size: 12.5px; color: var(--gray-500); margin-bottom: 5px;
+}
+.sum-row.green-val span:last-child { color: var(--success-500); font-weight: 600; }
+.sum-divider { border: none; border-top: 1.5px dashed var(--gray-200); margin: 10px 0; }
+.sum-total {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 700; color: var(--gray-900);
+  margin-bottom: 14px;
+}
+
+.pay-methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.pm-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px; border-radius: var(--r-md);
+  border: 1.5px solid var(--border-default);
+  background: var(--surface-1); cursor: pointer;
+  transition: all 0.12s;
+}
+.pm-btn:hover { border-color: var(--brand-300, #93C5FD); background: var(--brand-50); }
+.pm-btn.active { border-color: var(--brand-500); background: var(--brand-50); }
+.pm-btn svg { width: 16px; height: 16px; color: var(--gray-500); }
+.pm-btn.active svg { color: var(--brand-500); }
+.pm-btn span { font-size: 10.5px; font-weight: 600; color: var(--gray-500); }
+.pm-btn.active span { color: var(--brand-600); }
+
+.charge-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--brand-500), #4F46E5);
+  color: #fff; border: none; border-radius: var(--r-md);
+  padding: 13px; font-size: 14px; font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.charge-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.35); }
+.charge-btn svg { width: 16px; height: 16px; }
+
+/* ── ADD PRODUCT MODAL ── */
+.modal-scrim {
+  position: absolute; inset: 0;
+  background: rgba(9,14,25,0.6);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-xl);
+  width: 580px; max-height: 92%;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-default);
+  position: sticky; top: 0; background: var(--surface-1); z-index: 2;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 700; color: var(--gray-900);
+}
+.modal-sub { font-size: 12.5px; color: var(--gray-400); margin-top: 2px; }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--gray-100); border: none; color: var(--gray-500);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.12s;
+  flex-shrink: 0;
+}
+.modal-close:hover { background: var(--gray-200); color: var(--gray-800); }
+.modal-close svg { width: 13px; height: 13px; }
+.modal-body { padding: 22px 24px; }
+.modal-section { margin-bottom: 20px; }
+.modal-section-title {
+  font-size: 11.5px; font-weight: 700; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.modal-section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--gray-200);
+}
+.img-upload {
+  border: 2px dashed var(--gray-200); border-radius: var(--r-lg);
+  padding: 28px; text-align: center; cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface-2);
+}
+.img-upload:hover { border-color: var(--brand-400); background: var(--brand-50); }
+.img-upload svg { margin: 0 auto 10px; display: block; }
+.img-upload p { font-size: 13px; color: var(--gray-600); font-weight: 500; margin-bottom: 3px; }
+.img-upload span { font-size: 11.5px; color: var(--gray-400); }
+.sku-field-row { display: flex; gap: 8px; align-items: flex-end; }
+.sku-field-row .fg { flex: 1; }
+.sku-gen {
+  height: 38px; white-space: nowrap;
+  background: var(--brand-50); color: var(--brand-600);
+  border: 1.5px solid var(--brand-100); border-radius: var(--r-md);
+  padding: 0 12px; font-size: 12.5px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.sku-gen:hover { background: var(--brand-500); color: #fff; border-color: var(--brand-500); }
+.sku-gen svg { width: 13px; height: 13px; }
+.barcode-btn {
+  height: 38px; width: 38px; flex-shrink: 0;
+  background: var(--surface-2); border: 1.5px solid var(--border-default);
+  border-radius: var(--r-md); display: flex; align-items: center; justify-content: center;
+  color: var(--gray-500); cursor: pointer; transition: all 0.12s;
+}
+.barcode-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+.barcode-btn svg { width: 16px; height: 16px; }
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-default);
+  display: flex; justify-content: flex-end; gap: 10px;
+  background: var(--surface-2);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  position: sticky; bottom: 0;
+}
+.sku-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--success-50); border: 1px solid var(--success-100);
+  color: var(--success-500); font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px; margin-top: 5px;
+  transition: all 0.15s;
+}
+.sku-badge svg { width: 10px; height: 10px; }
+
+/* ── RESTAURANT SCREEN ── */
+#sc-restaurant .main { background: #F5F0EB; }
+.rest-header {
+  background: linear-gradient(135deg, #7C2D12 0%, #9A3412 50%, #C2410C 100%);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.rh-left h2 {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700; color: #fff;
+  margin-bottom: 2px;
+}
+.rh-left p { font-size: 11.5px; color: rgba(255,255,255,0.6); }
+.rh-right { display: flex; gap: 8px; align-items: center; }
+.rh-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px; padding: 4px 11px;
+  font-size: 11.5px; font-weight: 600; color: #fff;
+}
+.rh-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+.rh-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: var(--r-md); padding: 6px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.rh-btn:hover { background: rgba(255,255,255,0.25); }
+.rh-btn svg { width: 13px; height: 13px; }
+
+.rest-body { flex: 1; display: flex; overflow: hidden; }
+.floor-area {
+  flex: 1; padding: 20px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.floor-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.fkpi {
+  background: var(--surface-1); border: 1px solid var(--border-default);
+  border-radius: var(--r-lg); padding: 14px 16px;
+  box-shadow: var(--shadow-xs); text-align: center;
+}
+.fkpi-val {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 700; margin-bottom: 3px;
+}
+.fkpi-lbl { font-size: 11px; color: var(--gray-400); font-weight: 500; }
+
+.floor-section-title {
+  font-size: 12px; font-weight: 700; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+.table-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.table-tile {
+  background: var(--surface-1); border-radius: var(--r-lg);
+  padding: 14px 10px; text-align: center;
+  cursor: pointer; transition: all 0.15s;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-xs);
+  position: relative; overflow: hidden;
+}
+.table-tile::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+}
+.table-tile.available { border-color: #D1FAE5; }
+.table-tile.available::before { background: var(--success-500); }
+.table-tile.occupied { border-color: #FEE2E2; background: #FFF5F5; }
+.table-tile.occupied::before { background: var(--danger-500); }
+.table-tile.reserved { border-color: #FEF3C7; background: #FFFDF0; }
+.table-tile.reserved::before { background: var(--warning-500); }
+.table-tile.cleaning { border-color: var(--gray-200); }
+.table-tile.cleaning::before { background: var(--gray-400); }
+.table-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.tt-icon-wrap {
+  width: 36px; height: 36px; border-radius: 50%;
+  margin: 0 auto 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.table-tile.available .tt-icon-wrap { background: var(--success-50); }
+.table-tile.occupied .tt-icon-wrap { background: var(--danger-50); }
+.table-tile.reserved .tt-icon-wrap { background: var(--warning-50); }
+.table-tile.cleaning .tt-icon-wrap { background: var(--gray-100); }
+.tt-icon-wrap svg { width: 18px; height: 18px; }
+.table-tile.available .tt-icon-wrap svg { color: var(--success-500); }
+.table-tile.occupied .tt-icon-wrap svg { color: var(--danger-500); }
+.table-tile.reserved .tt-icon-wrap svg { color: var(--warning-500); }
+.table-tile.cleaning .tt-icon-wrap svg { color: var(--gray-400); }
+.tt-num {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 3px;
+}
+.tt-status { font-size: 10.5px; font-weight: 600; }
+.table-tile.available .tt-status { color: var(--success-500); }
+.table-tile.occupied .tt-status { color: var(--danger-500); }
+.table-tile.reserved .tt-status { color: #B45309; }
+.table-tile.cleaning .tt-status { color: var(--gray-500); }
+.tt-time { font-size: 10px; color: var(--gray-400); margin-top: 2px; }
+.tt-time.warn { color: var(--warning-500); font-weight: 600; }
+
+/* Kitchen panel */
+.kitchen-panel {
+  width: 300px; flex-shrink: 0;
+  background: #1A1208;
+  display: flex; flex-direction: column;
+  border-left: 1px solid rgba(255,255,255,0.05);
+}
+.kp-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.kp-title { font-family: var(--font-display); font-size: 13.5px; font-weight: 700; color: #fff; }
+.kp-count {
+  background: var(--orange-500); color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+}
+.kp-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.kot-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-lg); padding: 12px;
+  border-left: 3px solid;
+  transition: background 0.12s;
+}
+.kot-card:hover { background: rgba(255,255,255,0.07); }
+.kot-card.normal { border-left-color: var(--success-500); }
+.kot-card.delayed { border-left-color: var(--danger-500); }
+.kot-card.warning { border-left-color: var(--warning-500); }
+.kot-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.kot-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; }
+.kot-timer { font-size: 11px; font-weight: 700; }
+.kot-card.normal .kot-timer { color: var(--success-500); }
+.kot-card.delayed .kot-timer { color: var(--danger-500); }
+.kot-card.warning .kot-timer { color: var(--warning-500); }
+.kot-table { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.kot-items { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.kot-item { font-size: 12px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 5px; }
+.kot-item::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.3); flex-shrink: 0; }
+.kot-actions { display: flex; gap: 6px; }
+.kot-btn {
+  flex: 1; padding: 5px; border-radius: var(--r-sm);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  text-align: center; border: 1px solid; transition: all 0.12s;
+}
+.kot-btn.ready { background: var(--success-500); color: #fff; border-color: var(--success-500); }
+.kot-btn.ready:hover { opacity: 0.85; }
+.kot-btn.void { background: transparent; color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.1); }
+.kot-btn.void:hover { color: var(--danger-500); border-color: var(--danger-500); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .login-wrap { flex-direction: column; gap: 40px; }
+  .login-card { width: 100%; max-width: 400px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .table-grid { grid-template-columns: repeat(4, 1fr); }
+  .floor-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV STRIP -->
+<nav class="nav-strip">
+  <button class="active" onclick="go('sc-login',this)">01 · Login</button>
+  <button onclick="go('sc-onboard',this)">02 · Setup</button>
+  <button onclick="go('sc-dashboard',this)">03 · Dashboard</button>
+  <button onclick="go('sc-pos',this)">04 · POS</button>
+  <button onclick="go('sc-addprod',this)">05 · Add Product</button>
+  <button onclick="go('sc-restaurant',this)">06 · Restaurant</button>
+</nav>
+
+<div class="device">
+
+<!-- ══════════════════════════════════════════
+  01 · LOGIN
+══════════════════════════════════════════ -->
+<div class="screen active" id="sc-login" style="position:relative">
+  <span class="stag">01 · Login</span>
+  <div class="login-bg"></div>
+  <div class="login-wrap">
+
+    <!-- Left branding -->
+    <div class="login-brand">
+      <div class="login-brand-logo">
+        <div class="lb-mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            <circle cx="17.5" cy="17.5" r="3.5"/>
+          </svg>
+        </div>
+        <div class="lb-text">Biz<em>OS</em></div>
+      </div>
+      <h2>The complete operating<br>system for your business.</h2>
+      <p>POS, Inventory, HR, CRM, Accounting, and AI Insights — all in one platform. Built for Pakistan.</p>
+      <div class="login-features">
+        <div class="lf-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>FBR & GST compliant invoicing</span>
+        </div>
+        <div class="lf-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Works offline — power cuts, no problem</span>
+        </div>
+        <div class="lf-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Receipts via WhatsApp instantly</span>
+        </div>
+        <div class="lf-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Easypaisa & JazzCash built in</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right card -->
+    <div class="login-card">
+      <div class="login-card-title">Welcome back</div>
+      <div class="login-card-sub">Sign in to your BizOS account</div>
+      <div class="login-tabs">
+        <div class="ltab active" onclick="ltab(this)">Phone (OTP)</div>
+        <div class="ltab" onclick="ltab(this)">Email</div>
+      </div>
+
+      <label class="f-label">Phone Number</label>
+      <input class="f-input" value="+92 333 1234567" placeholder="+92 300 0000000">
+
+      <label class="f-label">One-Time Password</label>
+      <div class="otp-group">
+        <input class="otp-cell filled" maxlength="1" value="8" onclick="this.select()">
+        <input class="otp-cell filled" maxlength="1" value="4" onclick="this.select()">
+        <input class="otp-cell filled" maxlength="1" value="2" onclick="this.select()">
+        <input class="otp-cell cursor" maxlength="1" placeholder="" onclick="this.select()">
+        <input class="otp-cell" maxlength="1" placeholder="" onclick="this.select()">
+        <input class="otp-cell" maxlength="1" placeholder="" onclick="this.select()">
+      </div>
+      <div class="otp-hint">Didn't receive OTP? <a>Resend in 45s</a></div>
+
+      <button class="btn-login" onclick="go('sc-onboard', null)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Verify & Sign In
+      </button>
+
+      <div class="login-divider"><span>or</span></div>
+
+      <div class="qr-tile">
+        <div class="qr-box-mini">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="2" y="2" width="10" height="10" rx="1.5" fill="#111827"/>
+            <rect x="4" y="4" width="6" height="6" fill="white"/>
+            <rect x="20" y="2" width="10" height="10" rx="1.5" fill="#111827"/>
+            <rect x="22" y="4" width="6" height="6" fill="white"/>
+            <rect x="2" y="20" width="10" height="10" rx="1.5" fill="#111827"/>
+            <rect x="4" y="22" width="6" height="6" fill="white"/>
+            <rect x="20" y="20" width="4" height="4" fill="#111827"/>
+            <rect x="26" y="20" width="4" height="4" fill="#111827"/>
+            <rect x="20" y="26" width="4" height="4" fill="#111827"/>
+            <rect x="26" y="26" width="4" height="4" fill="#111827"/>
+            <rect x="14" y="2" width="4" height="4" fill="#111827"/>
+            <rect x="14" y="8" width="4" height="4" fill="#111827"/>
+            <rect x="2" y="14" width="4" height="4" fill="#111827"/>
+            <rect x="8" y="14" width="4" height="4" fill="#111827"/>
+            <rect x="14" y="14" width="4" height="4" fill="#2563EB"/>
+          </svg>
+        </div>
+        <div class="qr-tile-info">
+          <strong>Scan with BizOS Mobile</strong>
+          <span>One-tap login, no OTP needed</span>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  02 · ONBOARDING
+══════════════════════════════════════════ -->
+<div class="screen" id="sc-onboard" style="position:relative">
+  <span class="stag">02 · Business Setup</span>
+  <div class="ob-sidebar">
+    <div class="ob-brand">
+      <div class="lb-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <circle cx="17.5" cy="17.5" r="3.5"/>
+        </svg>
+      </div>
+      <span>BizOS</span>
+    </div>
+    <div class="ob-steps">
+      <div class="ob-step">
+        <div class="ob-dot done">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="ob-step-text"><strong>Phone Verified</strong><span>OTP confirmed</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-dot active">2</div>
+        <div class="ob-step-text"><strong>Business Info</strong><span>Name, type & location</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-dot pending">3</div>
+        <div class="ob-step-text"><strong>Tax & FBR</strong><span>NTN, GST settings</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-dot pending">4</div>
+        <div class="ob-step-text"><strong>Branch Setup</strong><span>Address & timings</span></div>
+      </div>
+      <div class="ob-step">
+        <div class="ob-dot pending">5</div>
+        <div class="ob-step-text"><strong>Invite Team</strong><span>Add first staff members</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="ob-content">
+    <div class="ob-progress-bar"><div class="ob-progress-fill"></div></div>
+    <div class="ob-head">
+      <h2>Tell us about your business</h2>
+      <p>We'll customize your dashboard, modules, and receipt templates based on your business type.</p>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Business Name</label><input class="fi" value="Ahmed General Store" placeholder="Your business name"></div>
+      <div class="fg"><label class="fl">Owner Name</label><input class="fi" value="Ahmed Farhan" placeholder="Full name"></div>
+    </div>
+    <div class="fg" style="margin-bottom:14px"><label class="fl">Select Your Business Type</label></div>
+    <div class="btype-grid">
+      <div class="btype-card sel" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+        <p>Retail Shop</p><small>General & clothing</small>
+      </div>
+      <div class="btype-card" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+        <p>Restaurant</p><small>Dine-in & takeaway</small>
+      </div>
+      <div class="btype-card" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8"><path d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg></div>
+        <p>Pharmacy</p><small>Medical & health</small>
+      </div>
+      <div class="btype-card" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+        <p>Salon / Spa</p><small>Beauty & services</small>
+      </div>
+      <div class="btype-card" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+        <p>Workshop</p><small>Repair & hardware</small>
+      </div>
+      <div class="btype-card" onclick="selType(this)">
+        <div class="btype-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+        <p>Wholesale</p><small>B2B distribution</small>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">City</label><select class="fs"><option>Karachi</option><option>Lahore</option><option>Islamabad</option><option>Rawalpindi</option><option>Faisalabad</option></select></div>
+      <div class="fg"><label class="fl">Currency</label><select class="fs"><option>PKR — Pakistani Rupee</option><option>USD — US Dollar</option></select></div>
+    </div>
+    <div class="ob-footer">
+      <span class="ob-footer-left">Step 2 of 5</span>
+      <div class="ob-footer-btns">
+        <button class="btn-secondary">Back</button>
+        <button class="btn-primary-light" onclick="go('sc-dashboard',null)">
+          Continue
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  03 · DASHBOARD
+══════════════════════════════════════════ -->
+<div class="screen" id="sc-dashboard">
+  <span class="stag">03 · Dashboard</span>
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sb-top">
+        <div class="sb-logo">
+          <div class="lb-mark">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+              <circle cx="17.5" cy="17.5" r="3.5"/>
+            </svg>
+          </div>
+          <span>BizOS</span>
+        </div>
+        <div class="sb-biz-card">
+          <div class="sb-biz-name">Ahmed General Store</div>
+          <div class="sb-biz-meta">
+            <span class="status-dot"></span>
+            <span>Main Branch · Karachi</span>
+          </div>
+        </div>
+      </div>
+      <div class="sb-body">
+        <div class="sb-section-label">Overview</div>
+        <div class="sb-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.96 1.61h9.72a2 2 0 001.95-1.57l1.65-8.43H6"/></svg>
+          Point of Sale
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          Inventory
+          <span class="sb-badge amber">6</span>
+        </div>
+        <div class="sb-section-label">People</div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Employees
+          <span class="sb-badge">2</span>
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          CRM
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Shifts
+        </div>
+        <div class="sb-section-label">Finance</div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Accounting
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Reports
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Procurement
+        </div>
+        <div class="sb-section-label">Settings</div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-user">
+          <div class="sb-avatar">AF</div>
+          <div>
+            <div class="sb-user-name">Ahmed Farhan</div>
+            <div class="sb-user-role">Owner · All Access</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main area -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search products, transactions, staff...">
+        </div>
+        <div class="tb-icon-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="tb-notif-dot"></span>
+        </div>
+        <div class="tb-icon-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+      </div>
+      <div class="content">
+        <!-- KPI Row -->
+        <div class="kpi-row">
+          <div class="kpi blue">
+            <div class="kpi-header">
+              <div class="kpi-label">Today's Revenue</div>
+              <div class="kpi-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            </div>
+            <div class="kpi-value">Rs 42,850</div>
+            <div class="kpi-delta"><span class="up">↑ 12.4%</span><span class="kpi-vs">vs yesterday</span></div>
+          </div>
+          <div class="kpi green">
+            <div class="kpi-header">
+              <div class="kpi-label">Transactions</div>
+              <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+            </div>
+            <div class="kpi-value">87</div>
+            <div class="kpi-delta"><span class="up">↑ 5</span><span class="kpi-vs">more than yesterday</span></div>
+          </div>
+          <div class="kpi amber">
+            <div class="kpi-header">
+              <div class="kpi-label">Low Stock Items</div>
+              <div class="kpi-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            </div>
+            <div class="kpi-value" style="color:#B45309">6</div>
+            <div class="kpi-delta"><span class="dn">Needs restock now</span></div>
+          </div>
+          <div class="kpi purple">
+            <div class="kpi-header">
+              <div class="kpi-label">Staff On Shift</div>
+              <div class="kpi-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+            </div>
+            <div class="kpi-value">5 <span style="font-size:14px;color:var(--gray-400);font-weight:500">/ 8</span></div>
+            <div class="kpi-delta"><span class="kpi-vs">Active right now</span></div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-row">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Revenue — This Week</div>
+              <div class="card-head-right">
+                <span style="font-size:12px;color:var(--gray-400)">Peak: <strong style="color:var(--gray-800)">Rs 9,200</strong></span>
+                <div class="period-sel">7 days ▾</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="bar-chart-wrap">
+                <div class="bc-bars" id="bcbars">
+                  <div class="bc-bar" style="height:48%" data-v="Rs 6,400"><div class="bc-bar-tooltip">Rs 6,400</div></div>
+                  <div class="bc-bar" style="height:62%" data-v="Rs 7,200"><div class="bc-bar-tooltip">Rs 7,200</div></div>
+                  <div class="bc-bar" style="height:41%" data-v="Rs 5,100"><div class="bc-bar-tooltip">Rs 5,100</div></div>
+                  <div class="bc-bar" style="height:78%" data-v="Rs 8,800"><div class="bc-bar-tooltip">Rs 8,800</div></div>
+                  <div class="bc-bar" style="height:58%" data-v="Rs 7,050"><div class="bc-bar-tooltip">Rs 7,050</div></div>
+                  <div class="bc-bar active" style="height:100%" data-v="Rs 9,200"><div class="bc-bar-tooltip">Rs 9,200</div></div>
+                  <div class="bc-bar" style="height:36%" data-v="Rs 4,100"><div class="bc-bar-tooltip">Rs 4,100</div></div>
+                </div>
+                <div class="bc-labels">
+                  <span class="bc-lbl">Mon</span><span class="bc-lbl">Tue</span><span class="bc-lbl">Wed</span>
+                  <span class="bc-lbl">Thu</span><span class="bc-lbl">Fri</span><span class="bc-lbl">Sat</span><span class="bc-lbl">Sun</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Payment Split</div>
+            </div>
+            <div class="card-body">
+              <div class="donut-area">
+                <svg width="90" height="90" viewBox="0 0 90 90" style="flex-shrink:0">
+                  <circle cx="45" cy="45" r="32" fill="none" stroke="#F3F4F6" stroke-width="14"/>
+                  <circle cx="45" cy="45" r="32" fill="none" stroke="#2563EB" stroke-width="14"
+                    stroke-dasharray="120.6 80.4" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+                  <circle cx="45" cy="45" r="32" fill="none" stroke="#10B981" stroke-width="14"
+                    stroke-dasharray="50.3 150.7" stroke-dashoffset="-120.6" transform="rotate(-90 45 45)"/>
+                  <circle cx="45" cy="45" r="32" fill="none" stroke="#F59E0B" stroke-width="14"
+                    stroke-dasharray="30.2 170.8" stroke-dashoffset="-170.9" transform="rotate(-90 45 45)"/>
+                  <text x="45" y="41" text-anchor="middle" font-size="11" font-weight="700" fill="#111827" font-family="Plus Jakarta Sans">60%</text>
+                  <text x="45" y="52" text-anchor="middle" font-size="8" fill="#6B7280" font-family="Inter">Cash</text>
+                </svg>
+                <div class="donut-legend">
+                  <div class="dleg-row"><div class="dleg-dot" style="background:#2563EB"></div><span class="dleg-name">Cash</span><span class="dleg-val">60%</span></div>
+                  <div class="dleg-row"><div class="dleg-dot" style="background:#10B981"></div><span class="dleg-name">Easypaisa</span><span class="dleg-val">25%</span></div>
+                  <div class="dleg-row"><div class="dleg-dot" style="background:#F59E0B"></div><span class="dleg-name">JazzCash</span><span class="dleg-val">15%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+          <div class="tc-head">
+            <div class="tc-head-left">
+              <span class="tc-title">Recent Transactions</span>
+              <span class="tc-count">87 today</span>
+            </div>
+            <button class="btn-text">View all →</button>
+          </div>
+          <table class="dt">
+            <thead>
+              <tr>
+                <th>Receipt #</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Cashier</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>INV-00892</strong></td><td>Walk-in<div class="sub">No CRM record</div></td><td>3 items</td><td><strong>Rs 2,450</strong></td><td>Cash</td><td>Zubair A.</td><td>2:34 PM</td><td><span class="badge badge-green">Paid</span></td></tr>
+              <tr><td><strong>INV-00891</strong></td><td>Ali Hassan<div class="sub">VIP · 1,240 pts</div></td><td>7 items</td><td><strong>Rs 8,200</strong></td><td>Easypaisa</td><td>Sara M.</td><td>1:58 PM</td><td><span class="badge badge-green">Paid</span></td></tr>
+              <tr><td><strong>INV-00890</strong></td><td>Walk-in</td><td>1 item</td><td><strong>Rs 550</strong></td><td>Cash</td><td>Zubair A.</td><td>1:22 PM</td><td><span class="badge badge-green">Paid</span></td></tr>
+              <tr><td><strong>INV-00889</strong></td><td>Sana Khan<div class="sub">Regular</div></td><td>4 items</td><td><strong>Rs 3,800</strong></td><td>JazzCash</td><td>Sara M.</td><td>12:45 PM</td><td><span class="badge badge-green">Paid</span></td></tr>
+              <tr><td><strong>INV-00888</strong></td><td>Walk-in</td><td>2 items</td><td><strong>Rs 1,100</strong></td><td>Cash</td><td>Zubair A.</td><td>11:30 AM</td><td><span class="badge badge-amber">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  04 · POS
+══════════════════════════════════════════ -->
+<div class="screen" id="sc-pos">
+  <span class="stag">04 · POS</span>
+  <div class="app-shell">
+    <!-- Mini sidebar for POS -->
+    <nav class="pos-sidebar">
+      <div class="sb-top">
+        <div class="sb-logo">
+          <div class="lb-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><circle cx="17.5" cy="17.5" r="3.5"/></svg></div>
+          <span>BizOS</span>
+        </div>
+        <div class="sb-biz-card">
+          <div class="sb-biz-name">Ahmed General Store</div>
+          <div class="sb-biz-meta"><span class="status-dot"></span><span>POS Mode · Shift Open</span></div>
+        </div>
+      </div>
+      <div class="sb-body">
+        <div class="sb-section-label">POS</div>
+        <div class="sb-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.96 1.61h9.72a2 2 0 001.95-1.57l1.65-8.43H6"/></svg>
+          New Sale
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Orders
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Receipts
+        </div>
+        <div class="sb-section-label">Shift</div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Shift Report
+        </div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Close Shift
+        </div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-user">
+          <div class="sb-avatar">ZA</div>
+          <div><div class="sb-user-name">Zubair Ahmed</div><div class="sb-user-role">Head Cashier</div></div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- POS content -->
+    <div class="pos-content">
+      <div class="pos-topbar">
+        <div class="topbar-title">Point of Sale</div>
+        <div class="pos-shift-badge"><span class="dot"></span> Shift Open — since 9:00 AM</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <div class="tb-icon-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="tb-icon-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="pos-body">
+        <!-- Left: products -->
+        <div class="pos-left">
+          <div class="pos-search-bar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="pos-search" placeholder="Search by name, SKU, or scan barcode…" oninput="posSearch(this.value)">
+            <button class="scan-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><line x1="21" y1="21" x2="16" y2="16"/><line x1="16" y1="21" x2="21" y2="16"/></svg>
+              Scan
+            </button>
+          </div>
+
+          <div class="cat-pills" id="cat-pills">
+            <div class="cat-pill active" onclick="setCat(this,'All')">All Products</div>
+            <div class="cat-pill" onclick="setCat(this,'Beverages')">Beverages</div>
+            <div class="cat-pill" onclick="setCat(this,'Dairy')">Dairy</div>
+            <div class="cat-pill" onclick="setCat(this,'Snacks')">Snacks</div>
+            <div class="cat-pill" onclick="setCat(this,'Household')">Household</div>
+            <div class="cat-pill" onclick="setCat(this,'Personal Care')">Personal Care</div>
+            <div class="cat-pill" onclick="setCat(this,'Grocery')">Grocery</div>
+          </div>
+
+          <div class="product-grid" id="prod-grid">
+            <!-- Products rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Right: order panel -->
+        <div class="order-panel">
+          <div class="op-head">
+            <div class="op-title">Current Order</div>
+            <div class="op-actions">
+              <div class="op-icon-btn" title="Hold order">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+              </div>
+              <div class="op-icon-btn danger" onclick="clearCart()" title="Clear order">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="op-customer">
+            <div class="op-customer-found" id="cust-found" style="display:none">
+              <div class="op-cf-avatar">AH</div>
+              <div><div class="op-cf-name">Ali Hassan</div><div class="op-cf-pts">Points: <span>1,240</span></div></div>
+              <div style="margin-left:auto;cursor:pointer;color:var(--gray-400)" onclick="clearCustomer()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </div>
+            </div>
+            <div class="op-customer-row" id="cust-add" onclick="addCustomer()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Add customer (optional)
+            </div>
+          </div>
+
+          <div class="op-items" id="cart-items">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gray-300);gap:8px;padding:20px 0" id="cart-empty">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.96 1.61h9.72a2 2 0 001.95-1.57l1.65-8.43H6"/></svg>
+              <span style="font-size:12.5px">Cart is empty</span>
+              <span style="font-size:11.5px;text-align:center">Click a product or scan barcode to add items</span>
+            </div>
+          </div>
+
+          <div class="op-summary">
+            <div class="sum-row"><span>Subtotal</span><span id="s-sub">Rs 0</span></div>
+            <div class="sum-row"><span>GST (17%)</span><span id="s-tax">Rs 0</span></div>
+            <div class="sum-row green-val"><span>Discount</span><span id="s-disc">– Rs 0</span></div>
+            <hr class="sum-divider">
+            <div class="sum-total"><span>Total</span><span id="s-total">Rs 0</span></div>
+            <div class="pay-methods">
+              <div class="pm-btn active" onclick="selPay(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                <span>Cash</span>
+              </div>
+              <div class="pm-btn" onclick="selPay(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <span>Card</span>
+              </div>
+              <div class="pm-btn" onclick="selPay(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.19"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M11.5 8a11 11 0 013 1.08"/></svg>
+                <span>Easy</span>
+              </div>
+              <div class="pm-btn" onclick="selPay(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>Jazz</span>
+              </div>
+            </div>
+            <button class="charge-btn" id="charge-btn" onclick="processCharge()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="charge-label">Charge Rs 0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  05 · ADD PRODUCT MODAL
+══════════════════════════════════════════ -->
+<div class="screen" id="sc-addprod" style="background:var(--gray-100);align-items:center;justify-content:center;min-height:720px;position:relative">
+  <span class="stag">05 · Add Product</span>
+  <!-- Background: blurred dashboard -->
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,#EFF6FF,#F5F3FF);opacity:0.6"></div>
+  <div class="modal-scrim" style="position:absolute">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Add New Product</div>
+          <div class="modal-sub">Fill in the details below to add to your inventory</div>
+        </div>
+        <button class="modal-close" onclick="go('sc-dashboard',null)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Image -->
+        <div class="modal-section">
+          <div class="modal-section-title">Product Image</div>
+          <div class="img-upload">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <p>Click to upload or drag & drop</p>
+            <span>PNG, JPG up to 5MB · Recommended: 800×800px</span>
+          </div>
+        </div>
+
+        <!-- Basic info -->
+        <div class="modal-section">
+          <div class="modal-section-title">Basic Information</div>
+          <div class="form-grid">
+            <div class="fg"><label class="fl">Product Name (English)</label><input class="fi" id="prod-name-en" placeholder="e.g. Dairy Milk 250ml" oninput="updateSKUPreview()"></div>
+            <div class="fg"><label class="fl">اردو نام (Optional)</label><input class="fi" placeholder="مصنوعات کا نام" style="text-align:right;direction:rtl"></div>
+          </div>
+          <div class="form-grid">
+            <div class="fg">
+              <label class="fl">Category</label>
+              <select class="fs" id="prod-cat" onchange="updateSKUPreview()">
+                <option value="">Select category…</option>
+                <option value="DAIRY">Dairy</option>
+                <option value="BEV">Beverages</option>
+                <option value="SNCK">Snacks</option>
+                <option value="GROC">Grocery</option>
+                <option value="PCARE">Personal Care</option>
+                <option value="HH">Household</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl">Unit of Measure</label>
+              <select class="fs">
+                <option>Piece (pcs)</option>
+                <option>Kilogram (kg)</option>
+                <option>Gram (g)</option>
+                <option>Litre (L)</option>
+                <option>Millilitre (ml)</option>
+                <option>Box</option>
+                <option>Pack</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKU -->
+        <div class="modal-section">
+          <div class="modal-section-title">SKU & Barcode</div>
+          <div class="sku-field-row">
+            <div class="fg">
+              <label class="fl">SKU Code</label>
+              <input class="fi" id="sku-val" placeholder="e.g. DML-250-NTL" style="font-family:monospace">
+            </div>
+            <button class="sku-gen" onclick="doGenSKU()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Auto-Generate
+            </button>
+            <button class="barcode-btn" title="Scan barcode">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="3" y2="18"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="11" y1="6" x2="11" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/><line x1="19" y1="6" x2="19" y2="18"/><line x1="1" y1="6" x2="5" y2="6"/><line x1="1" y1="18" x2="5" y2="18"/><line x1="17" y1="6" x2="23" y2="6"/><line x1="17" y1="18" x2="23" y2="18"/></svg>
+            </button>
+          </div>
+          <div id="sku-preview-wrap" style="margin-top:6px;display:none">
+            <div class="sku-badge" id="sku-preview">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="sku-preview-text"></span>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:6px">
+            Auto-generate creates a unique SKU from the product name + category. Or scan a physical barcode.
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="modal-section">
+          <div class="modal-section-title">Pricing</div>
+          <div class="form-grid">
+            <div class="fg"><label class="fl">Cost Price (Rs)</label><input class="fi" type="number" placeholder="0.00" id="cost-price" oninput="calcMargin()"></div>
+            <div class="fg"><label class="fl">Selling Price (Rs)</label><input class="fi" type="number" placeholder="0.00" id="sell-price" oninput="calcMargin()"></div>
+          </div>
+          <div id="margin-info" style="display:none;background:var(--success-50);border:1px solid var(--success-100);border-radius:var(--r-md);padding:10px 14px;font-size:12.5px;color:var(--success-500);font-weight:600">
+            <span id="margin-text"></span>
+          </div>
+          <div class="form-grid" style="margin-top:10px">
+            <div class="fg">
+              <label class="fl">GST Rate</label>
+              <select class="fs">
+                <option>17% — Standard GST</option>
+                <option>0% — Zero-rated (essential food)</option>
+                <option>5% — Reduced rate</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock -->
+        <div class="modal-section">
+          <div class="modal-section-title">Inventory</div>
+          <div class="form-grid">
+            <div class="fg"><label class="fl">Opening Stock</label><input class="fi" type="number" placeholder="0" value=""></div>
+            <div class="fg"><label class="fl">Low Stock Alert At</label><input class="fi" type="number" placeholder="5" value=""></div>
+          </div>
+          <div class="form-grid">
+            <div class="fg"><label class="fl">Reorder Quantity</label><input class="fi" type="number" placeholder="20" value=""></div>
+            <div class="fg"><label class="fl">Location / Shelf</label><input class="fi" placeholder="e.g. Aisle 3, Shelf B"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" onclick="go('sc-dashboard',null)">Cancel</button>
+        <button class="btn-primary-light" onclick="saveProduct()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Product
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  06 · RESTAURANT
+══════════════════════════════════════════ -->
+<div class="screen" id="sc-restaurant">
+  <span class="stag">06 · Restaurant Mode</span>
+  <div class="app-shell">
+    <nav class="sidebar" style="background:#120A00">
+      <div class="sb-top" style="border-color:rgba(255,255,255,0.05)">
+        <div class="sb-logo">
+          <div class="lb-mark" style="background:linear-gradient(135deg,#C2410C,#F97316)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>
+          </div>
+          <span>BizOS</span>
+        </div>
+        <div class="sb-biz-card" style="background:rgba(255,255,255,0.04)">
+          <div class="sb-biz-name">Spice Garden Restaurant</div>
+          <div class="sb-biz-meta"><span class="status-dot" style="background:#F97316"></span><span>Dine-in + Takeaway</span></div>
+        </div>
+      </div>
+      <div class="sb-body">
+        <div class="sb-section-label">Restaurant</div>
+        <div class="sb-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Floor Plan</div>
+        <div class="sb-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          KOT Queue
+          <span class="sb-badge">7</span>
+        </div>
+        <div class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.96 1.61h9.72a2 2 0 001.95-1.57l1.65-8.43H6"/></svg>Menu / POS</div>
+        <div class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Staff</div>
+        <div class="sb-section-label">Finance</div>
+        <div class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Reports</div>
+        <div class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Accounting</div>
+      </div>
+      <div class="sb-footer"><div class="sb-user"><div class="sb-avatar" style="background:linear-gradient(135deg,#C2410C,#F97316)">SG</div><div><div class="sb-user-name">Spice Garden</div><div class="sb-user-role">Manager View</div></div></div></div>
+    </nav>
+
+    <div class="main" style="background:#F5F0EB">
+      <div class="rest-header">
+        <div class="rh-left">
+          <h2>Floor Plan — Spice Garden</h2>
+          <p>Live table status · Thursday, 26 April · 7:30 PM</p>
+        </div>
+        <div class="rh-right">
+          <div class="rh-pill"><span class="dot" style="background:#10B981"></span>Available: 4</div>
+          <div class="rh-pill"><span class="dot" style="background:#EF4444"></span>Occupied: 8</div>
+          <div class="rh-pill"><span class="dot" style="background:#F59E0B"></span>Reserved: 2</div>
+          <button class="rh-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Reservation
+          </button>
+        </div>
+      </div>
+
+      <div class="rest-body">
+        <div class="floor-area">
+          <!-- KPIs -->
+          <div class="floor-kpis">
+            <div class="fkpi"><div class="fkpi-val" style="color:#F97316">Rs 68,400</div><div class="fkpi-lbl">Today's Revenue</div></div>
+            <div class="fkpi"><div class="fkpi-val">42</div><div class="fkpi-lbl">Covers Today</div></div>
+            <div class="fkpi"><div class="fkpi-val" style="color:#10B981">7</div><div class="fkpi-lbl">Active KOTs</div></div>
+            <div class="fkpi"><div class="fkpi-val" style="color:#EF4444">3</div><div class="fkpi-lbl">Delayed Orders</div></div>
+          </div>
+
+          <!-- Floor grid -->
+          <div>
+            <div class="floor-section-title" style="margin-bottom:10px">Ground Floor — 14 Tables</div>
+            <div class="table-grid" id="table-grid">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Kitchen panel -->
+        <div class="kitchen-panel">
+          <div class="kp-header">
+            <div class="kp-title">Kitchen Display</div>
+            <div class="kp-count">7 active</div>
+          </div>
+          <div class="kp-body">
+            <div class="kot-card normal">
+              <div class="kot-top"><span class="kot-num">KOT #247</span><span class="kot-timer">12 min</span></div>
+              <div class="kot-table">Table 01 · 4 guests</div>
+              <div class="kot-items">
+                <div class="kot-item">2× Chicken Biryani</div>
+                <div class="kot-item">1× Raita</div>
+                <div class="kot-item">3× Naan</div>
+              </div>
+              <div class="kot-actions">
+                <div class="kot-btn ready">Mark Ready</div>
+                <div class="kot-btn void">Void</div>
+              </div>
+            </div>
+            <div class="kot-card delayed">
+              <div class="kot-top"><span class="kot-num">KOT #248</span><span class="kot-timer">⚠ 28 min</span></div>
+              <div class="kot-table">Table 05 · 6 guests</div>
+              <div class="kot-items">
+                <div class="kot-item">1× Karahi Gosht</div>
+                <div class="kot-item">4× Roti</div>
+                <div class="kot-item">2× Soft Drink</div>
+              </div>
+              <div class="kot-actions">
+                <div class="kot-btn ready">Mark Ready</div>
+                <div class="kot-btn void">Void</div>
+              </div>
+            </div>
+            <div class="kot-card warning">
+              <div class="kot-top"><span class="kot-num">KOT #249</span><span class="kot-timer">18 min</span></div>
+              <div class="kot-table">Table 02 · 2 guests</div>
+              <div class="kot-items">
+                <div class="kot-item">2× Seekh Kebab</div>
+                <div class="kot-item">1× Mint Chutney</div>
+                <div class="kot-item">2× Paratha</div>
+              </div>
+              <div class="kot-actions">
+                <div class="kot-btn ready">Mark Ready</div>
+                <div class="kot-btn void">Void</div>
+              </div>
+            </div>
+            <div class="kot-card normal">
+              <div class="kot-top"><span class="kot-num">KOT #250</span><span class="kot-timer">5 min</span></div>
+              <div class="kot-table">Takeaway · Order #88</div>
+              <div class="kot-items">
+                <div class="kot-item">3× Chicken Tikka</div>
+                <div class="kot-item">2× Paratha</div>
+                <div class="kot-item">1× Mint Raita</div>
+              </div>
+              <div class="kot-actions">
+                <div class="kot-btn ready">Mark Ready</div>
+                <div class="kot-btn void">Void</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /device -->
+
+<script>
+// ─── SCREEN NAVIGATION ───────────────────────────────
+function go(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-strip button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+// Sync nav buttons by screen id
+const screenIds = ['sc-login','sc-onboard','sc-dashboard','sc-pos','sc-addprod','sc-restaurant'];
+document.querySelectorAll('.nav-strip button').forEach((btn, i) => {
+  btn.addEventListener('click', () => go(screenIds[i], btn));
+});
+
+// ─── LOGIN ───────────────────────────────────────────
+function ltab(el) {
+  document.querySelectorAll('.ltab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── ONBOARDING ──────────────────────────────────────
+function selType(el) {
+  document.querySelectorAll('.btype-card').forEach(c => {
+    c.classList.remove('sel');
+    c.querySelector('.btype-icon').style.background = '';
+    c.querySelectorAll('svg').forEach(s => s.setAttribute('stroke','#6B7280'));
+  });
+  el.classList.add('sel');
+  el.querySelector('.btype-icon').style.background = 'var(--brand-100)';
+  el.querySelectorAll('svg').forEach(s => s.setAttribute('stroke','#3B82F6'));
+}
+
+// ─── POS DATA ────────────────────────────────────────
+const products = [
+  { id:1, name:'Dairy Milk 250ml', sku:'DML-250-NTL', cat:'Dairy', price:180, stock:24, color:'blue' },
+  { id:2, name:'Head & Shoulders 400ml', sku:'HS-400-P&G', cat:'Personal Care', price:650, stock:8, color:'default' },
+  { id:3, name:'Peek Freans Sooper', sku:'PFS-PKT-EBM', cat:'Snacks', price:95, stock:48, color:'blue' },
+  { id:4, name:'Nestle Nido 400g', sku:'NND-400-NTL', cat:'Dairy', price:1250, stock:4, color:'default' },
+  { id:5, name:'Safeguard Soap 120g', sku:'SGS-120-P&G', cat:'Personal Care', price:85, stock:0, color:'default' },
+  { id:6, name:'Nescafe 3in1 Sachet', sku:'NCF-3IN1-NTL', cat:'Beverages', price:45, stock:60, color:'blue' },
+  { id:7, name:'Sunsilk Shampoo 200ml', sku:'SSL-200-UNL', cat:'Personal Care', price:280, stock:15, color:'default' },
+  { id:8, name:'Lipton Yellow Label', sku:'LPT-YL-UNL', cat:'Beverages', price:420, stock:22, color:'blue' },
+];
+
+let cart = {};
+let activeCat = 'All';
+let searchTerm = '';
+let activePayMethod = 'Cash';
+let customerAdded = false;
+
+function renderProducts() {
+  const grid = document.getElementById('prod-grid');
+  if (!grid) return;
+  const filtered = products.filter(p => {
+    const catMatch = activeCat === 'All' || p.cat === activeCat;
+    const searchMatch = !searchTerm || p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
+    return catMatch && searchMatch;
+  });
+  grid.innerHTML = filtered.map(p => `
+    <div class="prod-card ${p.stock===0?'out':''}" onclick="${p.stock>0?'addToCart('+p.id+')':''}">
+      <div class="prod-img ${p.color==='blue'?'colored':''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        </svg>
+      </div>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-sku">${p.sku}</div>
+      <div class="prod-footer">
+        <div class="prod-price">Rs ${p.price.toLocaleString()}</div>
+        <div class="prod-stock ${p.stock===0?'out-text':p.stock<=5?'low':''}">${p.stock===0?'Out of stock':p.stock<=5?'Low: '+p.stock:'Qty: '+p.stock}</div>
+      </div>
+      ${p.stock>0?'<button class="prod-add-btn" onclick="event.stopPropagation();addToCart('+p.id+')">+</button>':''}
+    </div>
+  `).join('');
+}
+
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  if (!p || p.stock === 0) return;
+  if (cart[id]) {
+    cart[id].qty++;
+  } else {
+    cart[id] = { ...p, qty: 1 };
+  }
+  renderCart();
+}
+
+function removeFromCart(id) {
+  if (cart[id]) {
+    cart[id].qty--;
+    if (cart[id].qty <= 0) delete cart[id];
+  }
+  renderCart();
+}
+
+function clearCart() {
+  cart = {};
+  renderCart();
+}
+
+function renderCart() {
+  const items = document.getElementById('cart-items');
+  const empty = document.getElementById('cart-empty');
+  const keys = Object.keys(cart);
+  if (keys.length === 0) {
+    items.innerHTML = '';
+    items.appendChild(empty);
+    empty.style.display = '';
+    updateSummary(0);
+    return;
+  }
+  empty.style.display = 'none';
+  items.innerHTML = keys.map(id => {
+    const item = cart[id];
+    return `
+      <div class="oi-row">
+        <div class="oi-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+          </svg>
+        </div>
+        <div class="oi-info">
+          <div class="oi-name">${item.name}</div>
+          <div class="oi-price">Rs ${item.price.toLocaleString()} each</div>
+        </div>
+        <div class="oi-qty">
+          <button class="qty-btn" onclick="removeFromCart(${id})">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button class="qty-btn" onclick="addToCart(${id})">+</button>
+        </div>
+      </div>`;
+  }).join('');
+  const sub = Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
+  updateSummary(sub);
+}
+
+function updateSummary(sub) {
+  const tax = Math.round(sub * 0.17);
+  const disc = customerAdded ? Math.round(sub * 0.05) : 0;
+  const total = sub + tax - disc;
+  document.getElementById('s-sub').textContent = 'Rs ' + sub.toLocaleString();
+  document.getElementById('s-tax').textContent = 'Rs ' + tax.toLocaleString();
+  document.getElementById('s-disc').textContent = disc > 0 ? '− Rs ' + disc.toLocaleString() : '− Rs 0';
+  document.getElementById('s-total').textContent = 'Rs ' + total.toLocaleString();
+  document.getElementById('charge-label').textContent = 'Charge Rs ' + total.toLocaleString();
+}
+
+function setCat(el, cat) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  activeCat = cat;
+  renderProducts();
+}
+
+function posSearch(val) {
+  searchTerm = val;
+  renderProducts();
+}
+
+function selPay(el) {
+  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activePayMethod = el.querySelector('span').textContent;
+}
+
+function addCustomer() {
+  document.getElementById('cust-add').style.display = 'none';
+  document.getElementById('cust-found').style.display = '';
+  customerAdded = true;
+  const sub = Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
+  updateSummary(sub);
+}
+function clearCustomer() {
+  document.getElementById('cust-found').style.display = 'none';
+  document.getElementById('cust-add').style.display = '';
+  customerAdded = false;
+  const sub = Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
+  updateSummary(sub);
+}
+
+function processCharge() {
+  const keys = Object.keys(cart);
+  if (keys.length === 0) return;
+  const btn = document.getElementById('charge-btn');
+  const sub = Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
+  const tax = Math.round(sub * 0.17);
+  const disc = customerAdded ? Math.round(sub * 0.05) : 0;
+  const total = sub + tax - disc;
+  btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Rs ${total.toLocaleString()} — Paid!`;
+  btn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+  setTimeout(() => {
+    clearCart();
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="charge-label">Charge Rs 0</span>';
+    btn.style.background = '';
+  }, 2000);
+}
+
+// ─── ADD PRODUCT ─────────────────────────────────────
+function doGenSKU() {
+  const nameEl = document.getElementById('prod-name-en');
+  const catEl = document.getElementById('prod-cat');
+  const name = nameEl.value.trim();
+  const cat = catEl.value || 'GEN';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const rand = (n) => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  const nameCode = name ? name.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,4) : rand(4);
+  const sku = cat + '-' + nameCode + '-' + rand(4);
+  const skuEl = document.getElementById('sku-val');
+  skuEl.value = sku;
+  skuEl.style.borderColor = 'var(--success-500)';
+  skuEl.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)';
+  const wrap = document.getElementById('sku-preview-wrap');
+  document.getElementById('sku-preview-text').textContent = sku + ' — generated';
+  wrap.style.display = '';
+  setTimeout(() => {
+    skuEl.style.borderColor = '';
+    skuEl.style.boxShadow = '';
+  }, 2000);
+}
+
+function calcMargin() {
+  const cost = parseFloat(document.getElementById('cost-price').value);
+  const sell = parseFloat(document.getElementById('sell-price').value);
+  const box = document.getElementById('margin-info');
+  if (cost > 0 && sell > 0) {
+    const margin = ((sell - cost) / sell * 100).toFixed(1);
+    const profit = (sell - cost).toFixed(0);
+    box.style.display = '';
+    document.getElementById('margin-text').textContent = `Margin: ${margin}% · Profit per unit: Rs ${profit}`;
+    box.style.background = margin > 0 ? 'var(--success-50)' : 'var(--danger-50)';
+    box.style.color = margin > 0 ? 'var(--success-500)' : 'var(--danger-500)';
+    box.style.borderColor = margin > 0 ? 'var(--success-100)' : 'var(--danger-100)';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function saveProduct() {
+  const btn = document.querySelector('.modal-foot .btn-primary-light');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Saved!';
+  btn.style.background = 'var(--success-500)';
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Product';
+    btn.style.background = '';
+    go('sc-dashboard', null);
+    document.querySelectorAll('.nav-strip button')[2].classList.add('active');
+    document.querySelectorAll('.nav-strip button').forEach((b,i) => { if(i!==2) b.classList.remove('active'); });
+  }, 1500);
+}
+
+// ─── RESTAURANT ──────────────────────────────────────
+const tableData = [
+  {num:'T-01', status:'occupied', time:'45 min', warn:false},
+  {num:'T-02', status:'occupied', time:'22 min', warn:false},
+  {num:'T-03', status:'available', time:'', warn:false},
+  {num:'T-04', status:'reserved', time:'8:00 PM', warn:false},
+  {num:'T-05', status:'occupied', time:'68 min', warn:true},
+  {num:'T-06', status:'available', time:'', warn:false},
+  {num:'T-07', status:'occupied', time:'15 min', warn:false},
+  {num:'T-08', status:'cleaning', time:'~5 min', warn:false},
+  {num:'T-09', status:'occupied', time:'32 min', warn:false},
+  {num:'T-10', status:'available', time:'', warn:false},
+  {num:'T-11', status:'reserved', time:'9:00 PM', warn:false},
+  {num:'T-12', status:'occupied', time:'10 min', warn:false},
+  {num:'T-13', status:'available', time:'', warn:false},
+  {num:'T-14', status:'occupied', time:'55 min', warn:true},
+];
+const statusCycle = ['available','occupied','reserved','cleaning'];
+const statusLabels = {available:'Available', occupied:'Occupied', reserved:'Reserved', cleaning:'Cleaning'};
+const tableIcons = {
+  available: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-2m-4 4H9m4 0v-4m0 4H9"/></svg>',
+  occupied: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+  reserved: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  cleaning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18l-2 13H5L3 3z"/><path d="M3 3l2 13"/><path d="M21 3l-2 13"/></svg>',
+};
+
+function renderTables() {
+  const grid = document.getElementById('table-grid');
+  if (!grid) return;
+  grid.innerHTML = tableData.map((t, i) => `
+    <div class="table-tile ${t.status}" onclick="cycleTable(${i})">
+      <div class="tt-icon-wrap">${tableIcons[t.status]}</div>
+      <div class="tt-num">${t.num}</div>
+      <div class="tt-status">${statusLabels[t.status]}</div>
+      ${t.time ? `<div class="tt-time ${t.warn?'warn':''}">${t.time}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function cycleTable(i) {
+  const cur = tableData[i].status;
+  const next = statusCycle[(statusCycle.indexOf(cur)+1)%statusCycle.length];
+  tableData[i].status = next;
+  if (next === 'occupied') tableData[i].time = '1 min';
+  else if (next === 'available') tableData[i].time = '';
+  else if (next === 'reserved') tableData[i].time = 'Tonight';
+  else tableData[i].time = '~5 min';
+  tableData[i].warn = false;
+  renderTables();
+}
+
+// KOT actions
+document.querySelectorAll('.kot-btn.ready').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const card = this.closest('.kot-card');
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(20px)';
+    card.style.transition = 'all 0.3s ease';
+    setTimeout(() => card.remove(), 300);
+  });
+});
+
+// ─── INIT ─────────────────────────────────────────────
+renderProducts();
+renderTables();
+</script>
+</body>
+</html>
