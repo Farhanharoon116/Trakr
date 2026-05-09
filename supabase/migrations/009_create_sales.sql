@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS sales (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id     UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  branch_id       UUID NOT NULL REFERENCES branches(id),
+  cashier_id      UUID NOT NULL REFERENCES users(id),
+  shift_id        UUID REFERENCES shifts(id),
+  customer_id     UUID REFERENCES customers(id),
+  subtotal        DECIMAL(12,2) NOT NULL,
+  discount        DECIMAL(12,2) NOT NULL DEFAULT 0,
+  tax_amount      DECIMAL(12,2) NOT NULL DEFAULT 0,
+  total           DECIMAL(12,2) NOT NULL,
+  payment_method  TEXT NOT NULL CHECK (payment_method IN ('cash','card','easypaisa','jazzcash','credit')),
+  receipt_number  VARCHAR(20) NOT NULL,
+  receipt_url     TEXT,
+  notes           TEXT,
+  synced_at       TIMESTAMPTZ,
+  offline_id      UUID,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);

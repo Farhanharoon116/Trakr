@@ -1,0 +1,195 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense } from 'react';
+import { AppShell } from './components/layout/AppShell';
+import { LoginPage } from './pages/auth/LoginPage';
+import { SetupPage } from './pages/auth/SetupPage';
+import { POSPage } from './pages/pos/POSPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { ProductsPage } from './pages/products/ProductsPage';
+import { InventoryPage } from './pages/inventory/InventoryPage';
+import { EmployeesPage } from './pages/hr/EmployeesPage';
+import { AttendancePage } from './pages/attendance/AttendancePage';
+import { ShiftsPage } from './pages/shifts/ShiftsPage';
+import { CustomersPage } from './pages/customers/CustomersPage';
+import { GSTReportPage } from './pages/reports/GSTReportPage';
+import { ConsolidatedReportsPage } from './pages/reports/ConsolidatedReportsPage';
+import { SettingsPage } from './pages/settings/SettingsPage';
+import { PurchaseOrdersPage } from './pages/procurement/PurchaseOrdersPage';
+import { AIPage } from './pages/ai/AIPage';
+import { LeaderboardPage } from './pages/leaderboard/LeaderboardPage';
+import { AuditLogPage } from './pages/audit/AuditLogPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { useAuthStore } from './store/auth.store';
+import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
+
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { accessToken } = useAuthStore();
+  if (!accessToken) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function RequireRole({
+  children,
+  roles,
+}: {
+  children: React.ReactNode;
+  roles: string[];
+}) {
+  const { user } = useAuthStore();
+  if (!user) return <Navigate to="/login" replace />;
+  if (!roles.includes(user.role)) {
+    // Cashier fallback → POS
+    if (user.role === 'cashier') return <Navigate to="/pos" replace />;
+    return <Navigate to="/pos" replace />;
+  }
+  return <>{children}</>;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<LoadingSkeleton className="h-screen w-full" />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/setup" element={<SetupPage />} />
+
+          {/* Protected routes */}
+          <Route
+            element={
+              <RequireAuth>
+                <AppShell />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<Navigate to="/pos" replace />} />
+            <Route
+              path="/pos"
+              element={
+                <RequireRole roles={['owner', 'manager', 'cashier']}>
+                  <POSPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <DashboardPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <ProductsPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <InventoryPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/employees"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <EmployeesPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/attendance"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <AttendancePage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/shifts"
+              element={
+                <RequireRole roles={['owner', 'manager', 'cashier']}>
+                  <ShiftsPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <CustomersPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/reports/gst"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <GSTReportPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/reports/branches"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <ConsolidatedReportsPage />
+                </RequireRole>
+              }
+            />
+            <Route path="/reports" element={<Navigate to="/reports/gst" replace />} />
+            <Route
+              path="/procurement"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <PurchaseOrdersPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/ai"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <AIPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={
+                <RequireRole roles={['owner', 'manager']}>
+                  <LeaderboardPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/audit"
+              element={
+                <RequireRole roles={['owner']}>
+                  <AuditLogPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <RequireRole roles={['owner']}>
+                  <SettingsPage />
+                </RequireRole>
+              }
+            />
+          </Route>
+
+          {/* Catch-all */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@bizos/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'mobile dev placeholder'",
+    "build": "echo 'mobile build placeholder'",
+    "test": "echo 'mobile test placeholder'",
+    "typecheck": "echo 'mobile typecheck placeholder'"
+  }
+}

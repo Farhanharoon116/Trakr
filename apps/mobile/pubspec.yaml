@@ -1,0 +1,88 @@
+name: bizos_mobile
+description: BizOS — Mobile POS + Employee Self-Service app for Pakistani SMEs.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.5.0
+
+  # HTTP / Networking
+  http: ^1.2.1
+
+  # Secure storage for JWT tokens
+  flutter_secure_storage: ^9.0.0
+
+  # Offline storage (Hive)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # State management — Riverpod 2.x
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navigation
+  go_router: ^14.2.0
+
+  # Bluetooth thermal printer
+  flutter_bluetooth_serial: ^0.4.0
+  esc_pos_utils_plus: ^2.0.1
+
+  # GPS for clock-in
+  geolocator: ^12.0.0
+
+  # Biometric / local auth
+  local_auth: ^2.2.0
+
+  # Push notifications
+  firebase_core: ^3.3.0
+  firebase_messaging: ^15.0.4
+  flutter_local_notifications: ^17.2.2
+
+  # Images
+  cached_network_image: ^3.3.1
+
+  # Internationalisation / Urdu locale
+  intl: ^0.19.0
+
+  # QR code on receipt
+  qr_flutter: ^4.1.0
+
+  # Connectivity
+  connectivity_plus: ^6.0.3
+
+  # UUID generation
+  uuid: ^4.4.0
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.9
+  riverpod_generator: ^2.4.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/images/
+
+  fonts:
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
